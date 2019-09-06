@@ -20,8 +20,8 @@ We currently strive to support Debian based distributions with Ubuntu 18.04 bein
 
 Initial environment setup:
 ```bash
-git clone https://github.com/ZeeNexus/AlgorandPoR.git
-cd algorand-por
+git clone https://github.com/ZeeNexus/algorandPoR.git
+cd algorandPoR
 sh ./scripts/configure_dev.sh
 ```
 
