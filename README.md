@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.com/algorand/go-algorand.svg?token=25XP72ADqbCQJ3TJVC9S&branch=master)](https://travis-ci.com/algorand/go-algorand)
 
-go-algorand
+go-algorand-por
 ====================
-Algorand's official implementation in Go.
+Algorand PoR's official implementation in Go.
 
 Algorand is a permissionless, pure proof-of-stake blockchain that delivers decentralization, scalability, security, and transaction finality.
 
