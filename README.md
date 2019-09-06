@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.com/algorand/go-algorand.svg?token=25XP72ADqbCQJ3TJVC9S&branch=master)](https://travis-ci.com/algorand/go-algorand)
 
-go-algorand-por
+
+algorand-por
 ====================
 Algorand PoR's official implementation in Go.
 
@@ -20,8 +20,8 @@ We currently strive to support Debian based distributions with Ubuntu 18.04 bein
 
 Initial environment setup:
 ```bash
-git clone https://github.com/algorand/go-algorand
-cd go-algorand
+git clone https://github.com/ZeeNexus/AlgorandPoR.git
+cd algorand-por
 sh ./scripts/configure_dev.sh
 ```
 
