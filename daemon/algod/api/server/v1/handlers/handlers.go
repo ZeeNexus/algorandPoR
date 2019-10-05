@@ -393,6 +393,7 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 		Round:                       uint64(lastRound),
 		Address:                     addr.String(),
 		Amount:                      amount.Raw,
+		Reputation:                  amount.Raw + 5, //XDDLG TODO
 		PendingRewards:              pendingRewards.Raw,
 		AmountWithoutPendingRewards: amountWithoutPendingRewards.Raw,
 		Rewards:                     record.RewardedMicroAlgos.Raw,
