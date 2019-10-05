@@ -113,6 +113,11 @@ type Account struct {
 	// required: true
 	Address string `json:"address"`
 
+	// Reputation indicates the numeric value for reputation for this account
+	//
+	// required: true
+	Reputation uint64 `json:"reputation"`
+
 	// Amount indicates the total number of MicroAlgos in the account
 	//
 	// required: true

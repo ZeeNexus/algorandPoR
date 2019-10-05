@@ -67,6 +67,7 @@ func init() {
 	accountCmd.AddCommand(deleteCmd)
 	accountCmd.AddCommand(listCmd)
 	accountCmd.AddCommand(renameCmd)
+	accountCmd.AddCommand(reputationCmd)
 	accountCmd.AddCommand(balanceCmd)
 	accountCmd.AddCommand(rewardsCmd)
 	accountCmd.AddCommand(changeOnlineCmd)
@@ -111,6 +112,12 @@ func init() {
 	// Lookup info for multisig account flag
 	infoMultisigCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Address of multisig account to look up")
 	infoMultisigCmd.MarkFlagRequired("address")
+
+
+	// Reputation flags
+	reputationCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Account address to retrieve reputation (required)")
+	reputationCmd.MarkFlagRequired("address")
+
 
 	// Balance flags
 	balanceCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Account address to retrieve balance (required)")
@@ -438,6 +445,26 @@ var listCmd = &cobra.Command{
 		}
 	},
 }
+
+
+var reputationCmd = &cobra.Command{
+	Use:   "reputation",
+	Short: "Retrieve the reputation for the specified account",
+	Long:  `Retrieve the reputation for the specified account`,
+	Args:  validateNoPosArgsFn,
+	Run: func(cmd *cobra.Command, args []string) {
+		dataDir := ensureSingleDataDir()
+		client := ensureAlgodClient(dataDir)
+		response, err := client.AccountInformation(accountAddress)
+		if err != nil {
+			reportErrorf(errorRequestFail, err)
+		}
+
+		fmt.Printf("%v microRep\n", 5 + response.Amount) //XDDLG TODO
+	},
+}
+
+
 
 var balanceCmd = &cobra.Command{
 	Use:   "balance",
