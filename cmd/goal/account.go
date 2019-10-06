@@ -459,8 +459,7 @@ var reputationCmd = &cobra.Command{
 		if err != nil {
 			reportErrorf(errorRequestFail, err)
 		}
-
-		fmt.Printf("%v microRep\n", 5 + response.Amount) //XDDLG TODO
+		fmt.Printf("%v microRep\n", response.Reputation)
 	},
 }
 
@@ -474,6 +473,7 @@ var balanceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dataDir := ensureSingleDataDir()
 		client := ensureAlgodClient(dataDir)
+		// here response is an instance of Account from daemon/algod/api/spec/v1/model.go
 		response, err := client.AccountInformation(accountAddress)
 		if err != nil {
 			reportErrorf(errorRequestFail, err)
