@@ -54,6 +54,7 @@ type AccountData struct {
 	_struct struct{} `codec:",omitempty,omitemptyarray"`
 
 	Status     Status     `codec:"onl"`
+	Reputation Reputation `codec:"reputation"`
 	MicroAlgos MicroAlgos `codec:"algo"`
 
 	// RewardsBase is used to implement rewards.

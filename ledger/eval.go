@@ -101,6 +101,10 @@ func (cs *roundCowState) Move(from basics.Address, to basics.Address, amt basics
 
 	var overflowed bool
 	fromBalNew.MicroAlgos, overflowed = basics.OSubA(fromBalNew.MicroAlgos, amt)
+
+	//XDDLG: TODO this is here now for teting only, increasing rep everytime we move balance
+	fromBalNew.Reputation.Raw = fromBalNew.Reputation.Raw + 1
+
 	if overflowed {
 		return fmt.Errorf("overspend (account %v, data %+v, tried to spend %v)", from, fromBal, amt)
 	}
