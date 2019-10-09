@@ -74,6 +74,7 @@ type Header struct {
 	FirstValid  basics.Round      `codec:"fv"`
 	LastValid   basics.Round      `codec:"lv"`
 	Note        []byte            `codec:"note"` // Uniqueness or app-level data about txn
+	Review      []byte            `codec:"note"` // Uniqueness or app-level data about txn
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
 }
@@ -91,6 +92,7 @@ type Transaction struct {
 	// Fields for different types of transactions
 	KeyregTxnFields
 	PaymentTxnFields
+	ReviewTxnFields
 
 	// The transaction's Txid is computed when we decode,
 	// and cached here, to avoid needlessly recomputing it.
@@ -228,6 +230,13 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 		}
 	case protocol.KeyRegistrationTx:
 		// All OK
+        
+	case protocol.ReviewTx:		
+		//err := tx.checkSpender(tx.Header, spec, proto)
+		//if err != nil {
+		//	return err
+		//}
+        // All OK
 
 	default:
 		return fmt.Errorf("unknown tx type %v", tx.Type)
@@ -242,6 +251,10 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 		nonZeroFields[protocol.KeyRegistrationTx] = true
 	}
 
+	if tx.ReviewTxnFields != (ReviewTxnFields{}) {
+		nonZeroFields[protocol.ReviewTx] = true
+	}	
+	
 	for t, nonZero := range nonZeroFields {
 		if nonZero && t != tx.Type {
 			return fmt.Errorf("transaction of type %v has non-zero fields for type %v", tx.Type, t)

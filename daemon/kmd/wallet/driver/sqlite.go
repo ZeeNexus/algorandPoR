@@ -50,7 +50,7 @@ const (
 	sqliteWalletHasMasterKey    = true
 )
 
-var sqliteWalletSupportedTxs = []protocol.TxType{protocol.PaymentTx, protocol.KeyRegistrationTx}
+var sqliteWalletSupportedTxs = []protocol.TxType{protocol.PaymentTx, protocol.KeyRegistrationTx, protocol.ReviewTx}
 var disallowedFilenameRegex = regexp.MustCompile("[^a-zA-Z0-9_-]*")
 var databaseFilenameRegex = regexp.MustCompile("^.*\\.db$")
 
