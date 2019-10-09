@@ -43,6 +43,11 @@ var (
 	rejectsFilename string
 	noteBase64      string
 	noteText        string
+	reviewBase64    string
+	reviewText      string
+	reviewRating    uint64
+	reviewEval      uint64
+	repAdjust       uint64
 	sign            bool
 	closeToAddress  string
 	noWaitAfterSend bool

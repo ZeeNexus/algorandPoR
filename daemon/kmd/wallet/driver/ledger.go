@@ -35,7 +35,7 @@ const (
 	ledgerWalletDriverVersion = 1
 )
 
-var ledgerWalletSupportedTxs = []protocol.TxType{protocol.PaymentTx, protocol.KeyRegistrationTx}
+var ledgerWalletSupportedTxs = []protocol.TxType{protocol.PaymentTx, protocol.KeyRegistrationTx, protocol.ReviewTx}
 
 // LedgerWalletDriver provides access to a hardware wallet on the
 // Ledger Nano S device.  The device must run the Algorand wallet
