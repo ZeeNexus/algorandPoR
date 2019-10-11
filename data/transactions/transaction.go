@@ -46,9 +46,17 @@ type SpecialAddresses struct {
 	RewardsPool basics.Address
 }
 
+
 // Balances allow to move MicroAlgos from one address to another and to update balance records, or to access and modify individual balance records
 // After a call to Put (or Move), future calls to Get or Move will reflect the updated balance record(s)
 type Balances interface {
+
+
+	//XDDLG: TODO is this the right place?
+	UpdateReputation(addr basics.Address, update int64 ) error
+
+
+
 	// Get looks up the balance record for an address
 	// If the account is known to be empty, then err should be nil and the returned balance record should have the given address and empty AccountData
 	// A non-nil error means the lookup is impossible (e.g., if the database doesn't have necessary state anymore)
@@ -336,6 +344,7 @@ func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyD
 	case protocol.KeyRegistrationTx:
 		err = tx.KeyregTxnFields.apply(tx.Header, balances, spec, &ad)
 
+	//XDDLG: TODO case new Review TXN
 	default:
 		err = fmt.Errorf("Unknown transaction type %v", tx.Type)
 	}

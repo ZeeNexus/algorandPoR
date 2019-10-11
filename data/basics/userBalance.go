@@ -139,6 +139,21 @@ func (u AccountData) Money(proto config.ConsensusParams, rewardsLevel uint64) (m
 	return e.MicroAlgos, e.RewardedMicroAlgos
 }
 
+
+
+func (u AccountData) WithUpdatedReputation(proto config.ConsensusParams, update int64) AccountData {
+	if u.Status != NotParticipating {
+		var ot OverflowTracker
+		newval, overflow := ot.AddUaS(u.Reputation.Raw, update)
+		if(overflow){
+			newval = u.Reputation.Raw
+		}
+		u.Reputation = Reputation{Raw: newval}
+	}
+	return u
+}
+
+
 // WithUpdatedRewards returns an updated number of algos in an AccountData
 // to reflect rewards up to some rewards level.
 func (u AccountData) WithUpdatedRewards(proto config.ConsensusParams, rewardsLevel uint64) AccountData {
