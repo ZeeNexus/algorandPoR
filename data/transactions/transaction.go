@@ -82,7 +82,10 @@ type Header struct {
 	FirstValid  basics.Round      `codec:"fv"`
 	LastValid   basics.Round      `codec:"lv"`
 	Note        []byte            `codec:"note"` // Uniqueness or app-level data about txn
-	Review      []byte            `codec:"note"` // Uniqueness or app-level data about txn
+	Review      []byte            `codec:"review"` // Uniqueness or app-level data about txn
+	ReviewRate  uint64            `codec:"reviewRate"` // Uniqueness or app-level data about txn
+    ReviewEval  uint64            `codec:"reviewEval"` // Uniqueness or app-level data about txn
+    RepAdjust   uint64            `codec:"reputationAdj"`
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
 }
@@ -240,7 +243,7 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 		// All OK
         
 	case protocol.ReviewTx:		
-		err := tx.checkSpender(tx.Header, spec, proto)
+		err := tx.checkSpenderReview(tx.Header, spec, proto)
 		if err != nil {
 			return err
 		}
@@ -296,10 +299,26 @@ func (tx Header) Aux() []byte {
 	return tx.Note
 }
 
-// Aux returns the note associated with this transaction
-func (tx Header) AuxReview() []byte {
+// AuxReview returns the review associated with this transaction
+func (tx Header) GetReview() []byte {
 	return tx.Review
 }
+
+// ReviewRate returns the review rate associated with this transaction
+func (tx Header) GetReviewRate() uint64 {
+	return tx.ReviewRate
+}
+
+// ReviewEval returns the review evaluation associated with this transaction
+func (tx Header) GetReviewEval() uint64 {
+	return tx.ReviewEval
+}
+
+// RepAdjust returns the review evaluation reputation adjustment associated with this transaction
+func (tx Header) GetRepAdjust() uint64 {
+	return tx.RepAdjust
+}
+
 
 // First returns the first round this transaction is valid
 func (tx Header) First() basics.Round {
@@ -322,6 +341,11 @@ func (tx Transaction) RelevantAddrs(spec SpecialAddresses, proto config.Consensu
 		if tx.PaymentTxnFields.CloseRemainderTo != (basics.Address{}) {
 			addrs = append(addrs, tx.PaymentTxnFields.CloseRemainderTo)
 		}
+	case protocol.ReviewTx:
+		addrs = append(addrs, tx.ReviewTxnFields.ReceiverReview)
+		if tx.ReviewTxnFields.CloseRemainderToReview != (basics.Address{}) {
+			addrs = append(addrs, tx.ReviewTxnFields.CloseRemainderToReview)
+		}		
 	}
 
 	return addrs
@@ -331,8 +355,10 @@ func (tx Transaction) RelevantAddrs(spec SpecialAddresses, proto config.Consensu
 func (tx Transaction) TxAmount() basics.MicroAlgos {
 	switch tx.Type {
 	case protocol.PaymentTx:
-		return tx.PaymentTxnFields.Amount
-
+		return tx.PaymentTxnFields.Amount		
+	case protocol.ReviewTx:
+		return tx.ReviewTxnFields.AmountReview
+		
 	default:
 		return basics.MicroAlgos{Raw: 0}
 	}

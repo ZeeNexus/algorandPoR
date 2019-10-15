@@ -296,6 +296,8 @@ func (lw *LedgerWallet) signTransactionHelper(tx transactions.Transaction) (sig 
 		msg = append(msg, 0x04)
 	case protocol.KeyRegistrationTx:
 		msg = append(msg, 0x05)
+	case protocol.ReviewTx:
+		msg = append(msg, 0x05)        
 	default:
 		err = fmt.Errorf("transaction type %s not supported", tx.Type)
 		return
@@ -328,9 +330,13 @@ func (lw *LedgerWallet) signTransactionHelper(tx transactions.Transaction) (sig 
 		msg = append(msg, tx.CloseRemainderTo[:]...)
 	case protocol.KeyRegistrationTx:
 		msg = append(msg, tx.VotePK[:]...)
-		msg = append(msg, tx.SelectionPK[:]...)
-	}
-
+		msg = append(msg, tx.SelectionPK[:]...)	
+	case protocol.ReviewTx:
+		msg = append(msg, tx.ReceiverReview[:]...)
+		msg = append(msg, uint64le(tx.AmountReview.Raw)...)
+		msg = append(msg, tx.CloseRemainderToReview[:]...)
+    }
+	
 	reply, err := lw.dev.Exchange(msg)
 	if err != nil {
 		return

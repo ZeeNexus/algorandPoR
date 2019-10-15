@@ -29,28 +29,28 @@ import (
 type ReviewTxnFields struct {
 	_struct struct{} `codec:",omitempty,omitemptyarray"`
 
-	Receiver basics.Address    `codec:"rcv"`
-	Amount   basics.MicroAlgos `codec:"amt"`
+	ReceiverReview basics.Address    `codec:"rcv"`
+	AmountReview   basics.MicroAlgos `codec:"amt"`
 
-	// When CloseRemainderTo is set, it indicates that the
+	// When CloseRemainderToReview is set, it indicates that the
 	// transaction is requesting that the account should be
 	// closed, and all remaining funds be transferred to this
 	// address.
-	CloseRemainderTo basics.Address `codec:"close"`
+	CloseRemainderToReview basics.Address `codec:"close"`
 }
 
-func (review ReviewTxnFields) checkSpender(header Header, spec SpecialAddresses, proto config.ConsensusParams) error {
-	if header.Sender == review.CloseRemainderTo {
+func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddresses, proto config.ConsensusParams) error {
+	if header.Sender == review.CloseRemainderToReview {
 		return fmt.Errorf("transaction cannot close account to its sender %v", header.Sender)
 	}
 
 	// the FeeSink account may only spend to the IncentivePool
 	if header.Sender == spec.FeeSink {
-		if review.Receiver != spec.RewardsPool {
-			return fmt.Errorf("cannot spend from fee sink's address %v to non incentive pool address %v", header.Sender, review.Receiver)
+		if review.ReceiverReview != spec.RewardsPool {
+			return fmt.Errorf("cannot spend from fee sink's address %v to non incentive pool address %v", header.Sender, review.ReceiverReview)
 		}
-		if review.CloseRemainderTo != (basics.Address{}) {
-			return fmt.Errorf("cannot close fee sink %v to %v", header.Sender, review.CloseRemainderTo)
+		if review.CloseRemainderToReview != (basics.Address{}) {
+			return fmt.Errorf("cannot close fee sink %v to %v", header.Sender, review.CloseRemainderToReview)
 		}
 	}
 	return nil
@@ -63,10 +63,10 @@ func (review ReviewTxnFields) checkSpender(header Header, spec SpecialAddresses,
 // than overwriting it.  For example, Transaction.Apply() may
 // have updated ad.SenderRewards, and this function should only
 // add to ad.SenderRewards (if needed), but not overwrite it.
-func (review reviewTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
+func (review ReviewTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
 	// move tx money
-	if !review.Amount.IsZero() || review.Receiver != (basics.Address{}) {
-		err := balances.Move(header.Sender, review.Receiver, review.Amount, &ad.SenderRewards, &ad.ReceiverRewards)
+	if !review.AmountReview.IsZero() || review.ReceiverReview != (basics.Address{}) {
+		err := balances.Move(header.Sender, review.ReceiverReview, review.AmountReview, &ad.SenderRewards, &ad.ReceiverRewards)
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func (review reviewTxnFields) apply(header Header, balances Balances, spec Speci
 
 
 
-	if review.CloseRemainderTo != (basics.Address{}) {
+	if review.CloseRemainderToReview != (basics.Address{}) {
 		rec, err := balances.Get(header.Sender)
 		if err != nil {
 			return err
@@ -92,7 +92,7 @@ func (review reviewTxnFields) apply(header Header, balances Balances, spec Speci
 
 		closeAmount := rec.AccountData.MicroAlgos
 		ad.ClosingAmount = closeAmount
-		err = balances.Move(header.Sender, review.CloseRemainderTo, closeAmount, &ad.SenderRewards, &ad.CloseRewards)
+		err = balances.Move(header.Sender, review.CloseRemainderToReview, closeAmount, &ad.SenderRewards, &ad.CloseRewards)
 		if err != nil {
 			return err
 		}
