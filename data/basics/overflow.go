@@ -145,3 +145,14 @@ func (t *OverflowTracker) SubR(a Round, b Round) Round {
 func (t *OverflowTracker) ScalarMulA(a MicroAlgos, b uint64) MicroAlgos {
 	return MicroAlgos{Raw: t.Mul(a.Raw, b)}
 }
+
+func (t *OverflowTracker) AddUaS(unsigned uint64, signed int64) (res uint64, overflowed bool) {
+	res = 0
+	overflowed = false
+	if(signed > 0) {
+		res, overflowed = OAdd(unsigned, uint64(signed))
+	} else {
+		res, overflowed = OSub(unsigned, uint64(-1 * signed))
+	}
+	return res, overflowed
+}

@@ -76,6 +76,10 @@ type mockBalances struct {
 	protocol.ConsensusVersion
 }
 
+func (balances mockBalances) UpdateReputation(addr basics.Address, update int64) error {
+	return nil
+}
+
 func (balances mockBalances) Get(basics.Address) (basics.BalanceRecord, error) {
 	return basics.BalanceRecord{}, nil
 }
