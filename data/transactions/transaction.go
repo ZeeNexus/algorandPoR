@@ -240,10 +240,10 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 		// All OK
         
 	case protocol.ReviewTx:		
-		//err := tx.checkSpender(tx.Header, spec, proto)
-		//if err != nil {
-		//	return err
-		//}
+		err := tx.checkSpender(tx.Header, spec, proto)
+		if err != nil {
+			return err
+		}
         // All OK
 
 	default:
@@ -281,6 +281,9 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 	if len(tx.Note) > proto.MaxTxnNoteBytes {
 		return fmt.Errorf("transaction note too big: %d > %d", len(tx.Note), proto.MaxTxnNoteBytes)
 	}
+    if len(tx.Review) > proto.MaxTxnNoteBytes {
+		return fmt.Errorf("transaction note too big: %d > %d", len(tx.Review), proto.MaxTxnNoteBytes)
+	}
 	if tx.Sender == spec.RewardsPool {
 		// this check is just to be safe, but reaching here seems impossible, since it requires computing a preimage of rwpool
 		return fmt.Errorf("transaction from incentive pool is invalid")
@@ -291,6 +294,11 @@ func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusPa
 // Aux returns the note associated with this transaction
 func (tx Header) Aux() []byte {
 	return tx.Note
+}
+
+// Aux returns the note associated with this transaction
+func (tx Header) AuxReview() []byte {
+	return tx.Review
 }
 
 // First returns the first round this transaction is valid
@@ -357,7 +365,9 @@ func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyD
 	case protocol.KeyRegistrationTx:
 		err = tx.KeyregTxnFields.apply(tx.Header, balances, spec, &ad)
 
-	//XDDLG: TODO case new Review TXN
+    case protocol.ReviewTx:
+		err = tx.ReviewTxnFields.apply(tx.Header, balances, spec, &ad)    
+        
 	default:
 		err = fmt.Errorf("Unknown transaction type %v", tx.Type)
 	}
