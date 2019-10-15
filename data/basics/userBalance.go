@@ -54,6 +54,7 @@ type AccountData struct {
 	_struct struct{} `codec:",omitempty,omitemptyarray"`
 
 	Status     Status     `codec:"onl"`
+	Reputation Reputation `codec:"reputation"`
 	MicroAlgos MicroAlgos `codec:"algo"`
 
 	// RewardsBase is used to implement rewards.
@@ -137,6 +138,21 @@ func (u AccountData) Money(proto config.ConsensusParams, rewardsLevel uint64) (m
 	e := u.WithUpdatedRewards(proto, rewardsLevel)
 	return e.MicroAlgos, e.RewardedMicroAlgos
 }
+
+
+
+func (u AccountData) WithUpdatedReputation(proto config.ConsensusParams, update int64) AccountData {
+	if u.Status != NotParticipating {
+		var ot OverflowTracker
+		newval, overflow := ot.AddUaS(u.Reputation.Raw, update)
+		if(overflow){
+			newval = u.Reputation.Raw
+		}
+		u.Reputation = Reputation{Raw: newval}
+	}
+	return u
+}
+
 
 // WithUpdatedRewards returns an updated number of algos in an AccountData
 // to reflect rewards up to some rewards level.

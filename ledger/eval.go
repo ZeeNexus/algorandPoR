@@ -62,6 +62,17 @@ func (x *roundCowBase) isDup(firstValid basics.Round, txid transactions.Txid) (b
 	return x.l.isDup(firstValid, x.rnd, txid)
 }
 
+
+func (cs *roundCowState) UpdateReputation(addr basics.Address, update int64) error {
+	olddata, err := cs.lookup(addr)
+	if err != nil {
+		return err
+	}
+	newdata := olddata.WithUpdatedReputation(cs.proto, update)
+	cs.put(addr, olddata, newdata)
+	return nil
+}
+
 // wrappers for roundCowState to satisfy the (current) transactions.Balances interface
 func (cs *roundCowState) Get(addr basics.Address) (basics.BalanceRecord, error) {
 	acctdata, err := cs.lookup(addr)
@@ -101,6 +112,7 @@ func (cs *roundCowState) Move(from basics.Address, to basics.Address, amt basics
 
 	var overflowed bool
 	fromBalNew.MicroAlgos, overflowed = basics.OSubA(fromBalNew.MicroAlgos, amt)
+
 	if overflowed {
 		return fmt.Errorf("overspend (account %v, data %+v, tried to spend %v)", from, fromBal, amt)
 	}

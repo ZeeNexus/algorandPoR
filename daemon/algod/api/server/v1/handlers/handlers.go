@@ -362,6 +362,7 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 
 	myLedger := ctx.Node.Ledger()
 	lastRound := myLedger.Latest()
+	//record here is an instance of AccountData on basics/data/userbalance.go
 	record, err := myLedger.Lookup(lastRound, basics.Address(addr))
 	if err != nil {
 		lib.ErrorResponse(w, http.StatusInternalServerError, err, errFailedLookingUpLedger, ctx.Log)
@@ -372,6 +373,8 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 		lib.ErrorResponse(w, http.StatusInternalServerError, err, errFailedLookingUpLedger, ctx.Log)
 		return
 	}
+
+	reputation := record.Reputation
 
 	amount := record.MicroAlgos
 	amountWithoutPendingRewards := recordWithoutPendingRewards.MicroAlgos
@@ -393,6 +396,7 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 		Round:                       uint64(lastRound),
 		Address:                     addr.String(),
 		Amount:                      amount.Raw,
+		Reputation:                  reputation.Raw,
 		PendingRewards:              pendingRewards.Raw,
 		AmountWithoutPendingRewards: amountWithoutPendingRewards.Raw,
 		Rewards:                     record.RewardedMicroAlgos.Raw,
