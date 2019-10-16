@@ -39,6 +39,38 @@ type ReviewTxnFields struct {
 	CloseRemainderToReview basics.Address `codec:"close"`
 }
 
+
+
+
+// Evaluate a review and add evaluation and repuation adjustment 
+// suggestion to header of the Review transaction
+func evaluateReview(header *Header) {
+    var Review      []byte = header.Review        
+	var ReviewRate  uint64 = header.ReviewRate
+    var ReviewEval  uint64 = 100 // 100 being 100% positive, 0 being 0% positive review
+    var RepAdjust   uint64 = 1   // negative or non-negative numbers to decrease or increase, respectively
+    
+    
+    // Evaluate the review
+    /////////////////////////
+    
+    
+    // magic happening here. bippity boppity
+    header.Review = Review
+    header.ReviewRate = ReviewRate
+    
+    // set the values in the header of the transaction
+    ///////////////////////////////////////////////////
+    header.ReviewEval = ReviewEval
+    header.RepAdjust = RepAdjust
+}
+
+
+
+
+
+
+
 func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddresses, proto config.ConsensusParams) error {
 	if header.Sender == review.CloseRemainderToReview {
 		return fmt.Errorf("transaction cannot close account to its sender %v", header.Sender)
@@ -53,8 +85,17 @@ func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddr
 			return fmt.Errorf("cannot close fee sink %v to %v", header.Sender, review.CloseRemainderToReview)
 		}
 	}
+	
+	evaluateReview(&header)
+	
+	
+	
 	return nil
 }
+
+
+
+
 
 // Apply changes the balances according to this transaction.
 // The ApplyData argument should reflect the changes made by

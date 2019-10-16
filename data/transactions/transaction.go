@@ -231,7 +231,7 @@ func (tx Transaction) MatchAddress(addr basics.Address, spec SpecialAddresses, p
 }
 
 // WellFormed checks that the transaction looks reasonable on its own (but not necessarily valid against the actual ledger). It does not check signatures.
-func (tx Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusParams) error {
+func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusParams) error {
 	switch tx.Type {
 	case protocol.PaymentTx:
 		// in case that the fee sink is spending, check that this spend is to a valid address
