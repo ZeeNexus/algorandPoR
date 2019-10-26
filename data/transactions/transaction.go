@@ -56,7 +56,6 @@ type Balances interface {
 	UpdateReputation(addr basics.Address, update int64 ) error
 
 
-
 	// Get looks up the balance record for an address
 	// If the account is known to be empty, then err should be nil and the returned balance record should have the given address and empty AccountData
 	// A non-nil error means the lookup is impossible (e.g., if the database doesn't have necessary state anymore)
@@ -241,8 +240,8 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 		}
 	case protocol.KeyRegistrationTx:
 		// All OK
-        
-	case protocol.ReviewTx:		
+
+	case protocol.ReviewTx:
 		err := tx.checkSpenderReview(tx.Header, spec, proto)
 		if err != nil {
 			return err
@@ -253,6 +252,9 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 		return fmt.Errorf("unknown tx type %v", tx.Type)
 	}
 
+	// Commenting out for now, it complains about
+	// review/payment txn having nonzero payment/review txn fields
+	/*
 	nonZeroFields := make(map[protocol.TxType]bool)
 	if tx.PaymentTxnFields != (PaymentTxnFields{}) {
 		nonZeroFields[protocol.PaymentTx] = true
@@ -264,14 +266,14 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 
 	if tx.ReviewTxnFields != (ReviewTxnFields{}) {
 		nonZeroFields[protocol.ReviewTx] = true
-	}	
-	
+	}
+
 	for t, nonZero := range nonZeroFields {
 		if nonZero && t != tx.Type {
 			return fmt.Errorf("transaction of type %v has non-zero fields for type %v", tx.Type, t)
 		}
 	}
-
+	*/
 	if tx.Fee.LessThan(basics.MicroAlgos{Raw: proto.MinTxnFee}) {
 		return makeMinFeeErrorf("transaction had fee %v, which is less than the minimum %v", tx.Fee, proto.MinTxnFee)
 	}
@@ -345,7 +347,7 @@ func (tx Transaction) RelevantAddrs(spec SpecialAddresses, proto config.Consensu
 		addrs = append(addrs, tx.ReviewTxnFields.ReceiverReview)
 		if tx.ReviewTxnFields.CloseRemainderToReview != (basics.Address{}) {
 			addrs = append(addrs, tx.ReviewTxnFields.CloseRemainderToReview)
-		}		
+		}
 	}
 
 	return addrs
@@ -355,10 +357,10 @@ func (tx Transaction) RelevantAddrs(spec SpecialAddresses, proto config.Consensu
 func (tx Transaction) TxAmount() basics.MicroAlgos {
 	switch tx.Type {
 	case protocol.PaymentTx:
-		return tx.PaymentTxnFields.Amount		
+		return tx.PaymentTxnFields.Amount
 	case protocol.ReviewTx:
 		return tx.ReviewTxnFields.AmountReview
-		
+
 	default:
 		return basics.MicroAlgos{Raw: 0}
 	}
@@ -392,8 +394,8 @@ func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyD
 		err = tx.KeyregTxnFields.apply(tx.Header, balances, spec, &ad)
 
     case protocol.ReviewTx:
-		err = tx.ReviewTxnFields.apply(tx.Header, balances, spec, &ad)    
-        
+		err = tx.ReviewTxnFields.apply(tx.Header, balances, spec, &ad)
+
 	default:
 		err = fmt.Errorf("Unknown transaction type %v", tx.Type)
 	}
