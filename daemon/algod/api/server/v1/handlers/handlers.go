@@ -72,6 +72,8 @@ func decorateUnknownTransactionTypeError(err error, txs node.TxnWithStatus) erro
 // transaction when error is non-nil.
 func txEncode(tx transactions.Transaction, ad transactions.ApplyData) (v1.Transaction, error) {
 	switch tx.Type {
+	case protocol.ReviewTx:
+		return reviewTxEncode(tx, ad), nil
 	case protocol.PaymentTx:
 		return paymentTxEncode(tx, ad), nil
 	case protocol.KeyRegistrationTx:
@@ -80,6 +82,37 @@ func txEncode(tx transactions.Transaction, ad transactions.ApplyData) (v1.Transa
 		return v1.Transaction{}, errors.New(errUnknownTransactionType)
 	}
 }
+
+
+func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.Transaction {
+	payment := v1.PaymentTransactionType{
+		To:           tx.Receiver.String(),
+		Amount:       tx.TxAmount().Raw,
+		ToRewards:    ad.ReceiverRewards.Raw,
+		CloseRewards: ad.CloseRewards.Raw,
+	}
+
+	if tx.CloseRemainderTo != (basics.Address{}) {
+		payment.CloseRemainderTo = tx.CloseRemainderTo.String()
+		payment.CloseAmount = ad.ClosingAmount.Raw
+	}
+
+	return v1.Transaction{
+		Type:        string(tx.Type),
+		TxID:        tx.ID().String(),
+		From:        tx.Src().String(),
+		Fee:         tx.TxFee().Raw,
+		FirstRound:  uint64(tx.First()),
+		LastRound:   uint64(tx.Last()),
+		Note:        tx.Aux(),
+		Payment:     &payment,
+		FromRewards: ad.SenderRewards.Raw,
+		GenesisID:   tx.GenesisID,
+		GenesisHash: tx.GenesisHash[:],
+	}
+}
+
+
 
 func paymentTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.Transaction {
 	payment := v1.PaymentTransactionType{
