@@ -17,8 +17,6 @@
 package transactions
 
 import (
-	"bytes"
-
 	"fmt"
 
 	"github.com/algorand/go-algorand/config"
@@ -71,17 +69,6 @@ func (payment PaymentTxnFields) apply(header Header, balances Balances, spec Spe
 			return err
 		}
 	}
-
-	//XDDLG TODO: Here for now for testing update of reputation as part of an approved payment.
-	// Prob need to be inside a tx.ReviewTxnFields.apply() in transaction.go
-	// and the note is just to prove increase decrease
-	// - Delete bytes import as well
-	var updateVal int64 = 1
-	if(bytes.Index(header.Note, []byte("decrease")) >= 0) {
-		updateVal = -1
-	}
-	balances.UpdateReputation(header.Sender, updateVal)
-
 
 
 	if payment.CloseRemainderTo != (basics.Address{}) {
