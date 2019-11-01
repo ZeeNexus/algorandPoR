@@ -196,6 +196,18 @@ type Transaction struct {
 	// swagger:strfmt byte
 	Note []byte `json:"noteb64"`
 
+	// ReviewNote is a free form data
+	//
+	// required: false
+	// swagger:strfmt byte
+	ReviewNote []byte `json:"reviewnoteb64"`	
+	
+    ReviewRate  uint64 `json:"reviewrate,omitempty"`	
+	
+	ReviewEval  uint64 `json:"revieweval,omitempty"`
+	
+	RepAdjust   int64 `json:"repadjust,omitempty"`
+	
 	// ConfirmedRound indicates the block number this transaction appeared in
 	//
 	// required: false
