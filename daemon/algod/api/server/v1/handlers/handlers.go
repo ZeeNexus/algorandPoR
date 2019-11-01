@@ -105,6 +105,7 @@ func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		FirstRound:  uint64(tx.First()),
 		LastRound:   uint64(tx.Last()),
 		Note:        tx.Aux(),
+		ReviewNote:  tx.GetReviewNote(),
 		Payment:     &payment,
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,
