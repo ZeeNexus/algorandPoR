@@ -81,10 +81,10 @@ type Header struct {
 	FirstValid  basics.Round      `codec:"fv"`
 	LastValid   basics.Round      `codec:"lv"`
 	Note        []byte            `codec:"note"` // Uniqueness or app-level data about txn
-	Review      []byte            `codec:"review"` // Uniqueness or app-level data about txn
-	ReviewRate  uint64            `codec:"reviewRate"` // Uniqueness or app-level data about txn
-    ReviewEval  uint64            `codec:"reviewEval"` // Uniqueness or app-level data about txn
-    RepAdjust   uint64            `codec:"reputationAdj"`
+	ReviewNote  []byte            `codec:"reviewnote"` // Uniqueness or app-level data about txn
+	ReviewRate  uint64            `codec:"reviewrate"` // Uniqueness or app-level data about txn
+    ReviewEval  uint64            `codec:"revieweval"` // Uniqueness or app-level data about txn
+    RepAdjust   int64             `codec:"repadjust"`
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
 }
@@ -256,7 +256,7 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 	// review/payment txn having nonzero payment/review txn fields
 	/*
 	nonZeroFields := make(map[protocol.TxType]bool)
-	if tx.PaymentTxnFields != (PaymentTxnFields{}) {
+	if (tx.PaymentTxnFields != (PaymentTxnFields{}) && tx.Type != "review") {
 		nonZeroFields[protocol.PaymentTx] = true
 	}
 
@@ -264,9 +264,9 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 		nonZeroFields[protocol.KeyRegistrationTx] = true
 	}
 
-	if tx.ReviewTxnFields != (ReviewTxnFields{}) {
+	if (tx.ReviewTxnFields != (ReviewTxnFields{}) && tx.Type == "review") {
 		nonZeroFields[protocol.ReviewTx] = true
-	}
+	} 
 
 	for t, nonZero := range nonZeroFields {
 		if nonZero && t != tx.Type {
@@ -274,6 +274,7 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 		}
 	}
 	*/
+	
 	if tx.Fee.LessThan(basics.MicroAlgos{Raw: proto.MinTxnFee}) {
 		return makeMinFeeErrorf("transaction had fee %v, which is less than the minimum %v", tx.Fee, proto.MinTxnFee)
 	}
@@ -286,8 +287,8 @@ func (tx *Transaction) WellFormed(spec SpecialAddresses, proto config.ConsensusP
 	if len(tx.Note) > proto.MaxTxnNoteBytes {
 		return fmt.Errorf("transaction note too big: %d > %d", len(tx.Note), proto.MaxTxnNoteBytes)
 	}
-    if len(tx.Review) > proto.MaxTxnNoteBytes {
-		return fmt.Errorf("transaction note too big: %d > %d", len(tx.Review), proto.MaxTxnNoteBytes)
+    if len(tx.ReviewNote) > proto.MaxTxnNoteBytes {
+		return fmt.Errorf("transaction note too big: %d > %d", len(tx.ReviewNote), proto.MaxTxnNoteBytes)
 	}
 	if tx.Sender == spec.RewardsPool {
 		// this check is just to be safe, but reaching here seems impossible, since it requires computing a preimage of rwpool
@@ -302,8 +303,8 @@ func (tx Header) Aux() []byte {
 }
 
 // AuxReview returns the review associated with this transaction
-func (tx Header) GetReview() []byte {
-	return tx.Review
+func (tx Header) GetReviewNote() []byte {
+	return tx.ReviewNote
 }
 
 // ReviewRate returns the review rate associated with this transaction
@@ -317,7 +318,7 @@ func (tx Header) GetReviewEval() uint64 {
 }
 
 // RepAdjust returns the review evaluation reputation adjustment associated with this transaction
-func (tx Header) GetRepAdjust() uint64 {
+func (tx Header) GetRepAdjust() int64 {
 	return tx.RepAdjust
 }
 
