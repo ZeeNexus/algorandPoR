@@ -20,6 +20,7 @@ import (
 	"bytes"
 
 	"fmt"
+    // "log"
 
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/data/basics"
@@ -45,22 +46,25 @@ type ReviewTxnFields struct {
 // Evaluate a review and add evaluation and repuation adjustment 
 // suggestion to header of the Review transaction
 func evaluateReview(header *Header) {
-    var Review      []byte = header.Review        
+    var ReviewNote  []byte = header.ReviewNote        
 	var ReviewRate  uint64 = header.ReviewRate
     var ReviewEval  uint64 = 100 // 100 being 100% positive, 0 being 0% positive review
-    var RepAdjust   uint64 = 1   // negative or non-negative numbers to decrease or increase, respectively
+    var RepAdjust   int64 = 3   // negative or non-negative numbers to decrease or increase, respectively
     
     
     // Evaluate the review
     /////////////////////////
     
     
-    // magic happening here. bippity boppity
-    header.Review = Review
-    header.ReviewRate = ReviewRate
+    // magic happening here. bippity boppity    
+	if(bytes.Index(ReviewNote, []byte("decrease")) >= 0) {
+		RepAdjust = -1
+    }    
+    
     
     // set the values in the header of the transaction
     ///////////////////////////////////////////////////
+    header.ReviewRate = ReviewRate
     header.ReviewEval = ReviewEval
     header.RepAdjust = RepAdjust
 }
@@ -86,7 +90,7 @@ func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddr
 		}
 	}
 	
-	evaluateReview(&header)
+	// evaluateReview(&header)
 	
 	
 	
@@ -117,12 +121,18 @@ func (review ReviewTxnFields) apply(header Header, balances Balances, spec Speci
 	// Prob need to be inside a tx.ReviewTxnFields.apply() in transaction.go
 	// and the note is just to prove increase decrease
 	// - Delete bytes import as well
-	var updateVal int64 = 1
-	if(bytes.Index(header.Note, []byte("decrease")) >= 0) {
-		updateVal = -1
-	}
-	balances.UpdateReputation(header.Sender, updateVal)
+	
+	//var updateVal int64 = 5
+	//if(bytes.Index(header.ReviewNote, []byte("decrease")) >= 0) {
+	//	updateVal = -1
+	//}
+	//balances.UpdateReputation(header.Sender, updateVal)
 
+    evaluateReview(&header)
+    
+    
+    balances.UpdateReputation(header.Sender, header.RepAdjust)
+    // log.Printf("%v %v\n", header.RepAdjust, header.ReviewEval)
 
 
 	if review.CloseRemainderToReview != (basics.Address{}) {
