@@ -25,6 +25,14 @@ type OverflowTracker struct {
 	Overflowed bool
 }
 
+func uintAbs(signed int64) (usinged uint64) {
+	if(signed < 0) {
+		return uint64(-signed)
+	}
+	return uint64(signed)
+}
+
+
 // OAdd16 adds 2 uint16 values with overflow detection
 func OAdd16(a uint16, b uint16) (res uint16, overflowed bool) {
 	res = a + b
@@ -149,10 +157,16 @@ func (t *OverflowTracker) ScalarMulA(a MicroAlgos, b uint64) MicroAlgos {
 func (t *OverflowTracker) AddUaS(unsigned uint64, signed int64) (res uint64, overflowed bool) {
 	res = 0
 	overflowed = false
-	if(signed > 0) {
-		res, overflowed = OAdd(unsigned, uint64(signed))
+	signedAsUnsigned := uintAbs(signed)
+	if(signed >= 0) {
+		res, overflowed = OAdd(unsigned, signedAsUnsigned)
 	} else {
-		res, overflowed = OSub(unsigned, uint64(-1 * signed))
+		if(unsigned > signedAsUnsigned) {
+			res, overflowed = OSub(unsigned, signedAsUnsigned)
+		} else {
+			res = 0
+			overflowed = true
+		}
 	}
 	return res, overflowed
 }
