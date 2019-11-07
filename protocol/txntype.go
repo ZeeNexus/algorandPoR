@@ -31,4 +31,7 @@ const (
 
 	// UnknownTx signals an error
 	UnknownTx TxType = "unknown"
+    
+    // ReviewTx indicates a payment transaction
+	ReviewTx TxType = "review"
 )

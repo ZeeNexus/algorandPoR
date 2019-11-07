@@ -38,7 +38,7 @@ parameters:
  round.
 
 If `Ledger` and `db.Accessor` provide crash-safe storage, `agreement`
-will also recover safely after crashes.
+will also recover safely after crashes.   
 
 # Specification
 

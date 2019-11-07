@@ -25,36 +25,77 @@ import (
 	"github.com/algorand/go-algorand/data/basics"
 )
 
-// PaymentTxnFields captures the fields used by payment transactions.
-type PaymentTxnFields struct {
+// ReviewTxnFields captures the fields used by review transactions.
+type ReviewTxnFields struct {
 	_struct struct{} `codec:",omitempty,omitemptyarray"`
 
-	Receiver basics.Address    `codec:"rcv"`
-	Amount   basics.MicroAlgos `codec:"amt"`
+	ReceiverReview basics.Address    `codec:"rcv"`
+	AmountReview   basics.MicroAlgos `codec:"amt"`
 
-	// When CloseRemainderTo is set, it indicates that the
+	// When CloseRemainderToReview is set, it indicates that the
 	// transaction is requesting that the account should be
 	// closed, and all remaining funds be transferred to this
 	// address.
-	CloseRemainderTo basics.Address `codec:"close"`
+	CloseRemainderToReview basics.Address `codec:"close"`
 }
 
-func (payment PaymentTxnFields) checkSpender(header Header, spec SpecialAddresses, proto config.ConsensusParams) error {
-	if header.Sender == payment.CloseRemainderTo {
+
+
+
+// Evaluate a review and add evaluation and repuation adjustment 
+// suggestion to header of the Review transaction
+func evaluateReview(header *Header) {
+    var Review      []byte = header.Review        
+	var ReviewRate  uint64 = header.ReviewRate
+    var ReviewEval  uint64 = 100 // 100 being 100% positive, 0 being 0% positive review
+    var RepAdjust   uint64 = 1   // negative or non-negative numbers to decrease or increase, respectively
+    
+    
+    // Evaluate the review
+    /////////////////////////
+    
+    
+    // magic happening here. bippity boppity
+    header.Review = Review
+    header.ReviewRate = ReviewRate
+    
+    // set the values in the header of the transaction
+    ///////////////////////////////////////////////////
+    header.ReviewEval = ReviewEval
+    header.RepAdjust = RepAdjust
+}
+
+
+
+
+
+
+
+func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddresses, proto config.ConsensusParams) error {
+	if header.Sender == review.CloseRemainderToReview {
 		return fmt.Errorf("transaction cannot close account to its sender %v", header.Sender)
 	}
 
 	// the FeeSink account may only spend to the IncentivePool
 	if header.Sender == spec.FeeSink {
-		if payment.Receiver != spec.RewardsPool {
-			return fmt.Errorf("cannot spend from fee sink's address %v to non incentive pool address %v", header.Sender, payment.Receiver)
+		if review.ReceiverReview != spec.RewardsPool {
+			return fmt.Errorf("cannot spend from fee sink's address %v to non incentive pool address %v", header.Sender, review.ReceiverReview)
 		}
-		if payment.CloseRemainderTo != (basics.Address{}) {
-			return fmt.Errorf("cannot close fee sink %v to %v", header.Sender, payment.CloseRemainderTo)
+		if review.CloseRemainderToReview != (basics.Address{}) {
+			return fmt.Errorf("cannot close fee sink %v to %v", header.Sender, review.CloseRemainderToReview)
 		}
 	}
+	
+	evaluateReview(&header)
+	
+	
+	
 	return nil
 }
+
+
+
+
 
 // Apply changes the balances according to this transaction.
 // The ApplyData argument should reflect the changes made by
@@ -63,16 +104,16 @@ func (payment PaymentTxnFields) checkSpender(header Header, spec SpecialAddresse
 // than overwriting it.  For example, Transaction.Apply() may
 // have updated ad.SenderRewards, and this function should only
 // add to ad.SenderRewards (if needed), but not overwrite it.
-func (payment PaymentTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
+func (review ReviewTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
 	// move tx money
-	if !payment.Amount.IsZero() || payment.Receiver != (basics.Address{}) {
-		err := balances.Move(header.Sender, payment.Receiver, payment.Amount, &ad.SenderRewards, &ad.ReceiverRewards)
+	if !review.AmountReview.IsZero() || review.ReceiverReview != (basics.Address{}) {
+		err := balances.Move(header.Sender, review.ReceiverReview, review.AmountReview, &ad.SenderRewards, &ad.ReceiverRewards)
 		if err != nil {
 			return err
 		}
 	}
 
-	//XDDLG TODO: Here for now for testing update of reputation as part of an approved payment.
+	//XDDLG TODO: Here for now for testing update of reputation as part of an approved review.
 	// Prob need to be inside a tx.ReviewTxnFields.apply() in transaction.go
 	// and the note is just to prove increase decrease
 	// - Delete bytes import as well
@@ -84,7 +125,7 @@ func (payment PaymentTxnFields) apply(header Header, balances Balances, spec Spe
 
 
 
-	if payment.CloseRemainderTo != (basics.Address{}) {
+	if review.CloseRemainderToReview != (basics.Address{}) {
 		rec, err := balances.Get(header.Sender)
 		if err != nil {
 			return err
@@ -92,7 +133,7 @@ func (payment PaymentTxnFields) apply(header Header, balances Balances, spec Spe
 
 		closeAmount := rec.AccountData.MicroAlgos
 		ad.ClosingAmount = closeAmount
-		err = balances.Move(header.Sender, payment.CloseRemainderTo, closeAmount, &ad.SenderRewards, &ad.CloseRewards)
+		err = balances.Move(header.Sender, review.CloseRemainderToReview, closeAmount, &ad.SenderRewards, &ad.CloseRewards)
 		if err != nil {
 			return err
 		}

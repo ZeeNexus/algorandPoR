@@ -1,4 +1,4 @@
-
+ 
 
 algorand-por
 ====================
@@ -22,7 +22,7 @@ Initial environment setup:
 ```bash
 git clone https://github.com/ZeeNexus/algorandPoR.git
 cd algorandPoR
-sh ./scripts/configure_dev.sh
+./scripts/configure_dev.sh
 ```
 
 At this point you are ready to build go-algorand. We use `make` and have a number of targets to automate common tasks.
@@ -30,15 +30,6 @@ At this point you are ready to build go-algorand. We use `make` and have a numbe
 #### build
 ```bash
 make install
-```
-
-#### test
-```bash
-# unit tests
-make test 
-
-# integration tests
-make integration 
 ```
 
 #### style and checks

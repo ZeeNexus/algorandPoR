@@ -34,6 +34,10 @@ type keyregTestBalances struct {
 	version protocol.ConsensusVersion
 }
 
+func (balances keyregTestBalances) UpdateReputation(addr basics.Address, update int64) error {
+	return nil
+}
+
 func (balances keyregTestBalances) Get(addr basics.Address) (basics.BalanceRecord, error) {
 	return balances.addrs[addr], nil
 }
