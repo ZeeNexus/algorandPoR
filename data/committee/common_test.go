@@ -158,6 +158,7 @@ type (
 		basics.Round
 		Period
 	}
+
 )
 
 // An AgreementSelector is the input used to define

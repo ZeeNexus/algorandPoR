@@ -92,7 +92,9 @@ func MakeService(p Parameters) *Service {
 
 	s.parameters = parameters(p)
 
+
 	s.log = serviceLogger{Logger: p.Logger}
+
 
 	s.quit = make(chan struct{})
 	s.done = make(chan struct{})
@@ -122,6 +124,7 @@ func (s *Service) Start() {
 
 	s.persistenceLoop.Start()
 	input := make(chan externalEvent)
+
 	output := make(chan []action)
 	ready := make(chan externalDemuxSignals)
 	go s.demuxLoop(ctx, input, output, ready)

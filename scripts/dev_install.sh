@@ -21,6 +21,20 @@ while [ "$1" != "" ]; do
     shift
 done
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if [ "${TARGETBINDIR}" = "" ]; then
     echo "Target path not specified.  Please specify the target path for binaries with -p <path>"
     exit 1

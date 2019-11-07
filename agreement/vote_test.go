@@ -59,7 +59,6 @@ func TestVoteValidation(t *testing.T) {
 
 		m, err := membership(ledger, address, round, period, step(i))
 		require.NoError(t, err)
-
 		//loop to find votes selected to participate
 		_, err = unauthenticatedVote.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m)
 		selected := err == nil

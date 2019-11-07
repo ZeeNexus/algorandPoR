@@ -37,7 +37,6 @@ import (
 // It handles persistence and secure deletion of secrets.
 type Root struct {
 	secrets *crypto.SignatureSecrets
-
 	store db.Accessor
 }
 

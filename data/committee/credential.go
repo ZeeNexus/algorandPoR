@@ -95,6 +95,7 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 	}
 
 	var weight uint64
+	var minimum uint64 = 0
 	userMoney := m.Record.VotingStake()
 	expectedSelection := float64(m.Selector.CommitteeSize(proto))
 
@@ -102,6 +103,8 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 		logging.Base().Panicf("UnauthenticatedCredential.Verify: total money = %v, but user money = %v", m.TotalMoney, userMoney)
 	} else if m.TotalMoney.IsZero() || expectedSelection == 0 || expectedSelection > float64(m.TotalMoney.Raw) {
 		logging.Base().Panicf("UnauthenticatedCredential.Verify: m.TotalMoney %v, expectedSelection %v", m.TotalMoney.Raw, expectedSelection)
+	} else if userMoney.ToUint64() <= minimum {
+	    logging.Base().Panicf("UnauthenticatedCredential.Verify: userMoney: %v too little to participate in committee", userMoney.Raw)
 	} else if userMoney.IsZero() {
 		// weight = 0
 	} else {

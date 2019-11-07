@@ -92,7 +92,7 @@ type AccountData struct {
 	// RewardedMicroAlgos is used to track how many algos were given
 	// to this account since the account was first created.
 	//
-	// This field is updated along with RewardBase; note that
+	// This field is updated along with RewardBase; note that	if u.Status != Online {
 	// it won't answer the question "how many algos did I make in
 	// the past week".
 	RewardedMicroAlgos MicroAlgos `codec:"ern"`

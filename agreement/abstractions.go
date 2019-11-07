@@ -164,7 +164,8 @@ type LedgerReader interface {
 	// confirmed. It may also return an error if the given Round is
 	// unavailable by the storage device. In that case, the agreement
 	// protocol may lose liveness.
-	//
+	// 	2 months ago
+
 	// TODO replace with ConsensusVersion
 	ConsensusParams(basics.Round) (config.ConsensusParams, error)
 
