@@ -49,6 +49,6 @@ var supplyCmd = &cobra.Command{
 			reportErrorf(errorRequestFail, err)
 		}
 
-		fmt.Printf("Round: %v\nTotal Money: %v microAlgos\nOnline Money: %v microAlgos\nTotalReputation: %v\nOnlineReputation: %v\n", response.Round, response.TotalMoney, response.OnlineMoney, response.TotalReputation, response.OnlineReputation)
+		fmt.Printf("Round: %v\nTotal Money: %v microAlgos\nOnline Money: %v microAlgos\nTotal Reputation: %v\nOnline Reputation: %v\n", response.Round, response.TotalMoney, response.OnlineMoney, response.TotalReputation, response.OnlineReputation)
 	},
 }
