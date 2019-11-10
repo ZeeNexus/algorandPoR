@@ -118,6 +118,14 @@ func OAddA(a MicroAlgos, b MicroAlgos) (res MicroAlgos, overflowed bool) {
 	return
 }
 
+
+func OAddRep(a Reputation, b Reputation) (res Reputation, overflowed bool) {
+	res.Raw, overflowed = OAdd(a.Raw, b.Raw)
+	return
+}
+
+
+
 // OSubA subtracts b from a with overflow tracking
 func OSubA(a MicroAlgos, b MicroAlgos) (res MicroAlgos, overflowed bool) {
 	res.Raw, overflowed = OSub(a.Raw, b.Raw)
@@ -133,6 +141,16 @@ func MulAIntSaturate(a MicroAlgos, b int) MicroAlgos {
 func (t *OverflowTracker) AddA(a MicroAlgos, b MicroAlgos) MicroAlgos {
 	return MicroAlgos{Raw: t.Add(uint64(a.Raw), uint64(b.Raw))}
 }
+
+// AddA adds 2 Reputation values with overflow tracking
+func (t *OverflowTracker) AddRep(a Reputation, b Reputation) Reputation {
+	return Reputation{Raw: t.Add(uint64(a.Raw), uint64(b.Raw))}
+}
+
+func (t *OverflowTracker) SubRep(a Reputation, b Reputation) Reputation {
+	return Reputation{Raw: t.Sub(uint64(a.Raw), uint64(b.Raw))}
+}
+
 
 // SubA subtracts b from a with overflow tracking
 func (t *OverflowTracker) SubA(a MicroAlgos, b MicroAlgos) MicroAlgos {

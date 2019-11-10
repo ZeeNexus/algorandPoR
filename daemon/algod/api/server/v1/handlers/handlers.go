@@ -802,6 +802,8 @@ func GetSupply(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) {
 	//       401: { description: Invalid API Token }
 	//       default: { description: Unknown Error }
 	latest := ctx.Node.Ledger().Latest()
+	//totals var is AccountTotals on ./ledgers/totals.go
+	// Totals methond is on ledger/ledger.go, that uses accountUpdates.totals (ledger/acctupdates.go)
 	totals, err := ctx.Node.Ledger().Totals(latest)
 	if err != nil {
 		err = fmt.Errorf("GetSupply(): round %d failed: %v", latest, err)
@@ -812,6 +814,8 @@ func GetSupply(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) {
 		Round:       uint64(latest),
 		TotalMoney:  totals.Participating().Raw,
 		OnlineMoney: totals.Online.Money.Raw,
+		TotalReputation: totals.ParticipatingRep().Raw,
+		OnlineReputation: totals.Online.Reputation.Raw,
 	}
 	SendJSON(SupplyResponse{&supply}, w, ctx.Log)
 }
