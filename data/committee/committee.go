@@ -41,6 +41,7 @@ type Membership struct {
 	Record     basics.BalanceRecord
 	Selector   Selector
 	TotalMoney basics.MicroAlgos
+	TotalReputation basics.Reputation
 }
 
 // A Seed contains cryptographic entropy which can be used to determine a
