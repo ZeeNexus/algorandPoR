@@ -1,1 +1,2 @@
 crypto/libsodium-fork/* linguist-vendored
+*.jar filter=lfs diff=lfs merge=lfs -text
