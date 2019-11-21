@@ -29,8 +29,6 @@ import (
 
 
 func SelectRepBased(reputation uint64, totalReputation uint64, expectedSize float64, vrfOutput crypto.Digest) uint64 {
-	//TODO hack, to test with very small netwotks
-	//var smallNetFactor uint64 = 1000000
  	binomialN := float64(reputation)
 	binomialP := expectedSize / float64(totalReputation)
 
