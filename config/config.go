@@ -46,6 +46,24 @@ const Mainnet protocol.NetworkID = "mainnet"
 // GenesisJSONFile is the name of the genesis.json file
 const GenesisJSONFile = "genesis.json"
 
+
+// NLP defines the global Algorand parameters which are used to call the NLP commandline to evaluate
+// sentimental analysis of a review
+type NLP struct {
+	AlgorandPORFullPath string // full system path to AlgorandPOR /home/<name>/algorandPoR/
+	NLPScriptPath       string // path from AlgorandPOR root to the NLP script including name
+	NLPScriptParams     string // any additional parameters sent to script besides what is built in
+}
+
+// This is used across all nodes we create.
+var NLPParams = NLP{
+	AlgorandPORFullPath: "/home/zach/algorandPoR/",
+	NLPScriptPath:   "tools/stanford-corenlp-full/nlpscript.sh",
+    NLPScriptParams: " -outputFormat json -outputDirectory /tmp", // note the first space
+}
+
+
+
 // Global defines global Algorand protocol parameters which should not be overriden.
 type Global struct {
 	SmallLambda time.Duration // min amount of time to wait for leader's credential (i.e., time to propagate one credential)
@@ -55,8 +73,8 @@ type Global struct {
 // Protocol holds the global configuration settings for the agreement protocol,
 // initialized with our current defaults. This is used across all nodes we create.
 var Protocol = Global{
-	SmallLambda: 2000 * time.Millisecond,
-	BigLambda:   15000 * time.Millisecond,
+	SmallLambda: 3000 * time.Millisecond,  // orig 2000
+	BigLambda:   25000 * time.Millisecond, // orig 15000
 }
 
 // ConsensusParams specifies settings that might vary based on the

@@ -155,7 +155,8 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 	if err == ledger.ErrNoSpace {
 		tentativeRound++
 	} else if err != nil {
-		return err
+		//return err
+        return fmt.Errorf("TransactionPool.test: TestTransaction err: %v", err)
 	}
 
 	if t.Txn.LastValid < tentativeRound {
@@ -199,23 +200,24 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 // Remember stores the provided transaction
 // Precondition: Only Remember() properly-signed and well-formed transactions (i.e., ensure t.WellFormed())
 func (pool *TransactionPool) Remember(t transactions.SignedTxn) error {
-	t.InitCaches()
+	//t.ResetCaches()
+    t.InitCaches()
 
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 
 	err := pool.test(t)
 	if err != nil {
-		return fmt.Errorf("TransactionPool.Remember: %v", err)
+		return fmt.Errorf("a TransactionPool.Remember: %v", err)
 	}
 
 	if pool.pendingBlockEvaluator == nil {
-		return fmt.Errorf("TransactionPool.Remember: no pending block evaluator")
+		return fmt.Errorf("b TransactionPool.Remember: no pending block evaluator")
 	}
 
 	err = pool.remember(t)
 	if err != nil {
-		return fmt.Errorf("TransactionPool.Remember: %v", err)
+		return fmt.Errorf("c TransactionPool.Remember: %v", err)
 	}
 
 	return nil

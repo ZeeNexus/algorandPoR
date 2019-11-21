@@ -17,7 +17,7 @@
 package transactions
 
 import (
-	"bytes"
+	//"bytes"
 
 	"fmt"
     // "log"
@@ -40,6 +40,34 @@ type ReviewTxnFields struct {
 	CloseRemainderToReview basics.Address `codec:"close"`
 }
 
+
+
+/*
+// Evaluate a review and add evaluation and repuation adjustment 
+// suggestion to header of the Review transaction
+func EvaluateReview(txn *SignedTxn) {
+    var ReviewNote  []byte = txn.Txn.Header.ReviewNote        
+	var ReviewRate  uint64 = txn.Txn.Header.ReviewRate
+    var ReviewEval  uint64 = 100 // 100 being 100% positive, 0 being 0% positive review
+    var RepAdjust   int64 = 2   // negative or non-negative numbers to decrease or increase, respectively
+    
+    
+    // Evaluate the review
+    /////////////////////////
+    
+    
+    // magic happening here. bippity boppity    
+	if(bytes.Index(ReviewNote, []byte("decrease")) >= 0) {
+		RepAdjust = -1
+    }    
+    
+    
+    // set the values in the header of the transaction
+    ///////////////////////////////////////////////////
+    txn.Txn.Header.ReviewRate = ReviewRate
+    txn.Txn.Header.ReviewEval = ReviewEval
+    txn.Txn.Header.RepAdjust = RepAdjust
+}
 
 
 
@@ -68,8 +96,7 @@ func evaluateReview(header *Header) {
     header.ReviewEval = ReviewEval
     header.RepAdjust = RepAdjust
 }
-
-
+*/
 
 
 
@@ -90,7 +117,7 @@ func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddr
 		}
 	}
 	
-	// evaluateReview(&header)
+	
 	
 	
 	
@@ -117,20 +144,11 @@ func (review ReviewTxnFields) apply(header Header, balances Balances, spec Speci
 		}
 	}
 
-	//XDDLG TODO: Here for now for testing update of reputation as part of an approved review.
-	// Prob need to be inside a tx.ReviewTxnFields.apply() in transaction.go
-	// and the note is just to prove increase decrease
-	// - Delete bytes import as well
-	
-	//var updateVal int64 = 5
-	//if(bytes.Index(header.ReviewNote, []byte("decrease")) >= 0) {
-	//	updateVal = -1
-	//}
-	//balances.UpdateReputation(header.Sender, updateVal)
 
-    evaluateReview(&header)
+
+    //evaluateReview(&header)
     
-    
+    //balances.UpdateReputation(header.Sender, 2)
     balances.UpdateReputation(header.Sender, header.RepAdjust)
     // log.Printf("%v %v\n", header.RepAdjust, header.ReviewEval)
 

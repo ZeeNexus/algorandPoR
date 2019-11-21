@@ -1,0 +1,430 @@
+{
+  "docId": "input.txt",
+  "sentences": [
+    {
+      "index": 0,
+      "parse": "(ROOT\n  (S\n    (NP (JJ great) (JJ wonderful) (NN movie) (NN everyone))\n    (VP (MD should)\n      (VP (VB see)\n        (NP (DT this)\n          (ADJP (JJ fantastic) (JJ good))\n          (JJ super) (NN fun)\n          (ADJP (JJ happy))\n          (NN film))))))",
+      "basicDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "see"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 1,
+          "dependentGloss": "great"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 2,
+          "dependentGloss": "wonderful"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 3,
+          "dependentGloss": "movie"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 4,
+          "dependentGloss": "everyone"
+        },
+        {
+          "dep": "aux",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 5,
+          "dependentGloss": "should"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 7,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "good",
+          "dependent": 8,
+          "dependentGloss": "fantastic"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 9,
+          "dependentGloss": "good"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 10,
+          "dependentGloss": "super"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 11,
+          "dependentGloss": "fun"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 12,
+          "dependentGloss": "happy"
+        },
+        {
+          "dep": "dobj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 13,
+          "dependentGloss": "film"
+        }
+      ],
+      "enhancedDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "see"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 1,
+          "dependentGloss": "great"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 2,
+          "dependentGloss": "wonderful"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 3,
+          "dependentGloss": "movie"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 4,
+          "dependentGloss": "everyone"
+        },
+        {
+          "dep": "aux",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 5,
+          "dependentGloss": "should"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 7,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "good",
+          "dependent": 8,
+          "dependentGloss": "fantastic"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 9,
+          "dependentGloss": "good"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 10,
+          "dependentGloss": "super"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 11,
+          "dependentGloss": "fun"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 12,
+          "dependentGloss": "happy"
+        },
+        {
+          "dep": "dobj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 13,
+          "dependentGloss": "film"
+        }
+      ],
+      "enhancedPlusPlusDependencies": [
+        {
+          "dep": "ROOT",
+          "governor": 0,
+          "governorGloss": "ROOT",
+          "dependent": 6,
+          "dependentGloss": "see"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 1,
+          "dependentGloss": "great"
+        },
+        {
+          "dep": "amod",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 2,
+          "dependentGloss": "wonderful"
+        },
+        {
+          "dep": "compound",
+          "governor": 4,
+          "governorGloss": "everyone",
+          "dependent": 3,
+          "dependentGloss": "movie"
+        },
+        {
+          "dep": "nsubj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 4,
+          "dependentGloss": "everyone"
+        },
+        {
+          "dep": "aux",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 5,
+          "dependentGloss": "should"
+        },
+        {
+          "dep": "det",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 7,
+          "dependentGloss": "this"
+        },
+        {
+          "dep": "amod",
+          "governor": 9,
+          "governorGloss": "good",
+          "dependent": 8,
+          "dependentGloss": "fantastic"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 9,
+          "dependentGloss": "good"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 10,
+          "dependentGloss": "super"
+        },
+        {
+          "dep": "compound",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 11,
+          "dependentGloss": "fun"
+        },
+        {
+          "dep": "amod",
+          "governor": 13,
+          "governorGloss": "film",
+          "dependent": 12,
+          "dependentGloss": "happy"
+        },
+        {
+          "dep": "dobj",
+          "governor": 6,
+          "governorGloss": "see",
+          "dependent": 13,
+          "dependentGloss": "film"
+        }
+      ],
+      "sentimentValue": "4",
+      "sentiment": "Verypositive",
+      "sentimentDistribution": [
+        0.00679993880775,
+        0.00550569564563,
+        0.04089336091011,
+        0.12660684037297,
+        0.82019416426353
+      ],
+      "sentimentTree": "(ROOT|sentiment=4|prob=0.820\n  (NP|sentiment=4|prob=0.530 (JJ|sentiment=4|prob=0.908 great)\n    (@NP|sentiment=4|prob=0.588 (JJ|sentiment=3|prob=0.897 wonderful)\n      (@NP|sentiment=2|prob=0.830 (NN|sentiment=2|prob=0.998 movie) (NN|sentiment=2|prob=0.998 everyone))))\n  (VP|sentiment=4|prob=0.528 (MD|sentiment=2|prob=0.998 should)\n    (VP|sentiment=3|prob=0.596 (VB|sentiment=2|prob=0.994 see)\n      (NP|sentiment=4|prob=0.555 (DT|sentiment=2|prob=0.998 this)\n        (@NP|sentiment=4|prob=0.536\n          (ADJP|sentiment=4|prob=0.633 (JJ|sentiment=3|prob=0.857 fantastic) (JJ|sentiment=3|prob=0.987 good))\n          (@NP|sentiment=3|prob=0.433 (JJ|sentiment=4|prob=0.334 super)\n            (@NP|sentiment=4|prob=0.435 (NN|sentiment=4|prob=0.921 fun)\n              (@NP|sentiment=3|prob=0.505 (ADJP|sentiment=4|prob=0.760 happy) (NN|sentiment=2|prob=0.999 film)))))))))",
+      "tokens": [
+        {
+          "index": 1,
+          "word": "great",
+          "originalText": "great",
+          "characterOffsetBegin": 0,
+          "characterOffsetEnd": 5,
+          "pos": "JJ",
+          "before": "",
+          "after": " "
+        },
+        {
+          "index": 2,
+          "word": "wonderful",
+          "originalText": "wonderful",
+          "characterOffsetBegin": 6,
+          "characterOffsetEnd": 15,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 3,
+          "word": "movie",
+          "originalText": "movie",
+          "characterOffsetBegin": 16,
+          "characterOffsetEnd": 21,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 4,
+          "word": "everyone",
+          "originalText": "everyone",
+          "characterOffsetBegin": 22,
+          "characterOffsetEnd": 30,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 5,
+          "word": "should",
+          "originalText": "should",
+          "characterOffsetBegin": 31,
+          "characterOffsetEnd": 37,
+          "pos": "MD",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 6,
+          "word": "see",
+          "originalText": "see",
+          "characterOffsetBegin": 38,
+          "characterOffsetEnd": 41,
+          "pos": "VB",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 7,
+          "word": "this",
+          "originalText": "this",
+          "characterOffsetBegin": 42,
+          "characterOffsetEnd": 46,
+          "pos": "DT",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 8,
+          "word": "fantastic",
+          "originalText": "fantastic",
+          "characterOffsetBegin": 47,
+          "characterOffsetEnd": 56,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 9,
+          "word": "good",
+          "originalText": "good",
+          "characterOffsetBegin": 57,
+          "characterOffsetEnd": 61,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 10,
+          "word": "super",
+          "originalText": "super",
+          "characterOffsetBegin": 62,
+          "characterOffsetEnd": 67,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 11,
+          "word": "fun",
+          "originalText": "fun",
+          "characterOffsetBegin": 68,
+          "characterOffsetEnd": 71,
+          "pos": "NN",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 12,
+          "word": "happy",
+          "originalText": "happy",
+          "characterOffsetBegin": 72,
+          "characterOffsetEnd": 77,
+          "pos": "JJ",
+          "before": " ",
+          "after": " "
+        },
+        {
+          "index": 13,
+          "word": "film",
+          "originalText": "film",
+          "characterOffsetBegin": 78,
+          "characterOffsetEnd": 82,
+          "pos": "NN",
+          "before": " ",
+          "after": "\n"
+        }
+      ]
+    }
+  ]
+}

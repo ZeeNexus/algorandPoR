@@ -345,8 +345,9 @@ func (*Ledger) AssemblePayset(pool *pools.TransactionPool, eval *ledger.BlockEva
 				// logAt = Warn
 				stats.InvalidCount++
 			}
-
+            
 			logAt(msg)
+            
 		} else {
 			fee := txn.Txn.Fee.Raw
 			encodedLen := txn.GetEncodedLength()
