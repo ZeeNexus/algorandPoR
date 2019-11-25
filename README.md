@@ -1,6 +1,6 @@
  
 
-algorand-por
+algorand-por eval build (check config.go for nlp params)
 ====================
 Algorand PoR's official implementation in Go.
 
