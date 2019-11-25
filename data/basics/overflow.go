@@ -178,6 +178,9 @@ func (t *OverflowTracker) AddUaS(unsigned uint64, signed int64) (res uint64, ove
 	signedAsUnsigned := uintAbs(signed)
 	if(signed >= 0) {
 		res, overflowed = OAdd(unsigned, signedAsUnsigned)
+		if(overflowed) {
+			res = unsigned
+		}
 	} else {
 		if(unsigned > signedAsUnsigned) {
 			res, overflowed = OSub(unsigned, signedAsUnsigned)
