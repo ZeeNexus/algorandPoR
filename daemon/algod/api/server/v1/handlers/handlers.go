@@ -111,7 +111,8 @@ func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,
 		GenesisHash: tx.GenesisHash[:],
-        TimeIn:      tx.GetTimeIn(),
+    TimeIn:      tx.GetTimeIn(),
+
 	}
 }
 
@@ -169,6 +170,32 @@ func keyregTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		GenesisHash: tx.GenesisHash[:],
 	}
 }
+
+
+func keyregTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.Transaction {
+	keyreg := v1.KeyregTransactionType{
+		VotePK:          tx.KeyregTxnFields.VotePK[:],
+		SelectionPK:     tx.KeyregTxnFields.SelectionPK[:],
+		VoteFirst:       uint64(tx.KeyregTxnFields.VoteFirst),
+		VoteLast:        uint64(tx.KeyregTxnFields.VoteLast),
+		VoteKeyDilution: tx.KeyregTxnFields.VoteKeyDilution,
+	}
+
+	return v1.Transaction{
+		Type:        string(tx.Type),
+		TxID:        tx.ID().String(),
+		From:        tx.Src().String(),
+		Fee:         tx.TxFee().Raw,
+		FirstRound:  uint64(tx.First()),
+		LastRound:   uint64(tx.Last()),
+		Note:        tx.Aux(),
+		Keyreg:      &keyreg,
+		FromRewards: ad.SenderRewards.Raw,
+		GenesisID:   tx.GenesisID,
+		GenesisHash: tx.GenesisHash[:],
+	}
+}
+
 
 func txWithStatusEncode(tr node.TxnWithStatus) (v1.Transaction, error) {
 	s, err := txEncode(tr.Txn.Txn, tr.ApplyData)

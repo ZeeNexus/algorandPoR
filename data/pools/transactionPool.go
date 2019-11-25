@@ -71,7 +71,9 @@ const expiredHistory = 10
 
 // timeoutOnNewBlock determines how long Test() and Remember() wait for
 // OnNewBlock() to process a new block that appears to be in the ledger.
+
 const timeoutOnNewBlock = time.Second * 3
+
 
 // NumExpired returns the number of transactions that expired at the end of a round (only meaningful if cleanup has
 // been called for that round)
@@ -155,8 +157,10 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 	if err == ledger.ErrNoSpace {
 		tentativeRound++
 	} else if err != nil {
+
 		//return err
         return fmt.Errorf("TransactionPool.test: TestTransaction err: %v", err)
+
 	}
 
 	if t.Txn.LastValid < tentativeRound {
@@ -212,12 +216,16 @@ func (pool *TransactionPool) Remember(t transactions.SignedTxn) error {
 	}
 
 	if pool.pendingBlockEvaluator == nil {
+
 		return fmt.Errorf("b TransactionPool.Remember: no pending block evaluator")
+
 	}
 
 	err = pool.remember(t)
 	if err != nil {
+
 		return fmt.Errorf("c TransactionPool.Remember: %v", err)
+
 	}
 
 	return nil

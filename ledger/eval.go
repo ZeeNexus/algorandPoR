@@ -363,6 +363,7 @@ func (eval *BlockEvaluator) TestTransaction(txn transactions.SignedTxn, ad *tran
 
 
 
+
 // Evaluate a review and add evaluation and repuation adjustment 
 // suggestion to header of the Review transaction
 func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust int64, err error, stderr bytes.Buffer) {
@@ -481,7 +482,6 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     // return the values in the header of the transaction    
     return ReviewEval, RepAdjust, nil, stderr
 }
-
 
 
 // transaction tentatively executes a new transaction as part of this block evaluation.
@@ -639,8 +639,7 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	
 	
 
-    
-    
+
 	if remember {
 		// Remember this TXID (to detect duplicates)
 		cow.addTx(txn.ID())
@@ -648,10 +647,12 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		eval.block.Payset = append(eval.block.Payset, txib)
 		eval.totalTxBytes += thisTxBytes
 		cow.commitToParent()
+
         if  isReview && eval.generate {
         //return fmt.Errorf("review transaction %v: rate: %v adjust: %v",
 				//txn.ID(), txn.Txn.GetReviewRate(),txn.Txn.GetRepAdjust())
         }
+
 	}
 
 	return nil

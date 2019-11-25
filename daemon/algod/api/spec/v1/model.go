@@ -18,9 +18,11 @@
 package v1
 
 
+
 import (
     "time"
 )
+
 // NodeStatus contains the information about a node status
 // swagger:model NodeStatus
 type NodeStatus struct {
@@ -213,7 +215,7 @@ type Transaction struct {
 	RepAdjust   int64 `json:"repadjust,omitempty"`
 	
 	TimeIn      time.Time `json:"timein,omitempty"`
-	
+
 	// ConfirmedRound indicates the block number this transaction appeared in
 	//
 	// required: false
