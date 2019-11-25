@@ -24,7 +24,7 @@ import (
 	"github.com/algorand/go-algorand/logging"
 )
 
-var filterTimeout = 2 * config.Protocol.SmallLambda
+var filterTimeout = 3 * config.Protocol.SmallLambda
 var deadlineTimeout = config.Protocol.BigLambda + config.Protocol.SmallLambda
 var partitionStep = next + 3
 var recoveryExtraTimeout = config.Protocol.SmallLambda

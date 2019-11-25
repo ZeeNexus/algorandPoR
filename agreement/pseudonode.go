@@ -31,7 +31,7 @@ import (
 )
 
 // AssemblyTime is the max amount of time to spend on generating a proposal block.
-const AssemblyTime time.Duration = 250 * time.Millisecond
+const AssemblyTime time.Duration = 1000 * time.Millisecond //orig 250
 
 // TODO put these in config
 const (
@@ -430,6 +430,7 @@ func (t pseudonodeProposalsTask) execute(verifier *AsyncVoteVerifier, quit chan 
 		return
 	}
 
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(pseudonode.go/execute) call makeProposals"))  
 	payloads, votes := t.node.makeProposals(t.round, t.period, t.participation)
 	fields := logging.Fields{
 		"Context":      "Agreement",
@@ -445,6 +446,7 @@ func (t pseudonodeProposalsTask) execute(verifier *AsyncVoteVerifier, quit chan 
 	// It's not immediately obvious how to log a diff, we may need to change the interface.
 	// For now, don't log at all, and revisit when the metric becomes more important.
 
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/GenerateBlock) verify each vote"))  
 	results := make(chan asyncVerifyVoteResponse, len(votes))
 	for i, uv := range votes {
 		msg := message{Tag: protocol.AgreementVoteTag, UnauthenticatedVote: uv}
@@ -460,6 +462,7 @@ func (t pseudonodeProposalsTask) execute(verifier *AsyncVoteVerifier, quit chan 
 	var verifiedVotes []asyncVerifyVoteResponse
 	var verifiedPayloads []proposal
 
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/GenerateBlock) check if any cryptoOutputs have any error"))  
 	for i := range cryptoOutputs {
 		if cryptoOutputs[i].err != nil {
 			// this is normal and happens every time an account isn't self-selected for voting.
@@ -505,7 +508,7 @@ func (t pseudonodeProposalsTask) execute(verifier *AsyncVoteVerifier, quit chan 
 			return
 		}
 	}
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/GenerateBlock) create msg event for each verifiedPayloads"))  
 	for _, payload := range verifiedPayloads {
 		msg := message{Tag: protocol.ProposalPayloadTag, UnauthenticatedProposal: payload.u(), Proposal: payload}
 		select {
@@ -517,4 +520,5 @@ func (t pseudonodeProposalsTask) execute(verifier *AsyncVoteVerifier, quit chan 
 			return
 		}
 	}
+	
 }

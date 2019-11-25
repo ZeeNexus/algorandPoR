@@ -17,6 +17,10 @@
 // Package v1 defines models exposed by algod rest api
 package v1
 
+
+import (
+    "time"
+)
 // NodeStatus contains the information about a node status
 // swagger:model NodeStatus
 type NodeStatus struct {
@@ -207,6 +211,8 @@ type Transaction struct {
 	ReviewEval  uint64 `json:"revieweval,omitempty"`
 	
 	RepAdjust   int64 `json:"repadjust,omitempty"`
+	
+	TimeIn      time.Time `json:"timein,omitempty"`
 	
 	// ConfirmedRound indicates the block number this transaction appeared in
 	//

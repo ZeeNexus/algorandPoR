@@ -519,12 +519,17 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
         
         txn.Txn.Header.ReviewEval = eval
         txn.Txn.Header.RepAdjust = adjust
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(after eval review) eval:%v adjust:%v", eval, adjust)) 
+        
         
          
         
         
-        txn.ResetCaches()  // tx changed so we need to reset the computed hashed id in tx
-        txn.InitCaches()
+        //txn.ResetCaches()  // tx changed so we need to reset the computed hashed id in tx
+        //txn.InitCaches()
+        
+        
+        
         //return fmt.Errorf("rn: %v ", reviewNote) 
         //return fmt.Errorf("eval: %v rate: %v adjust: %v", txn.Txn.GetReviewEval(), txn.Txn.GetReviewRate(),txn.Txn.GetRepAdjust())  
 
@@ -684,7 +689,7 @@ func (eval *BlockEvaluator) GenerateBlock() (*ValidatedBlock, error) {
 	if !eval.generate {
 		logging.Base().Panicf("GenerateBlock() called but generate is false")
 	}
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/GenerateBlock) begin"))  
 	err := eval.endOfBlock()
 	if err != nil {
 		return nil, err
@@ -700,11 +705,16 @@ func (eval *BlockEvaluator) GenerateBlock() (*ValidatedBlock, error) {
 		delta: eval.state.mods,
 		aux:   *eval.aux,
 	}
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/GenerateBlock) RETURN VB"))  
 	return &vb, nil
 }
 
 func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, validate bool, txcache VerifiedTxnCache, executionPool execpool.BacklogPool) (stateDelta, evalAux, error) {
 	eval, err := startEvaluator(l, blk.BlockHeader, aux, validate, false, txcache, executionPool)
+    
+    //infomsg := fmt.Errorf("ZZZZINFO(resultstr) %v ZZZZEND", result)    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) startEvaluator"))   
+    
 	if err != nil {
 		return stateDelta{}, evalAux{}, err
 	}
@@ -712,6 +722,8 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 	// TODO: batch tx sig verification: ingest blk.Payset and output a list of ValidatedTx
 	// Next, transactions
 	payset, err := blk.DecodePaysetWithAD()
+    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) DecodePaysetWithAD"))  
 	if err != nil {
 		return stateDelta{}, evalAux{}, err
 	}
@@ -724,6 +736,7 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 		}
 
 		err = eval.Transaction(txn.SignedTxn, &txn.ApplyData)
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.Transaction"))  
 		if err != nil {
 			return stateDelta{}, evalAux{}, err
 		}
@@ -731,6 +744,7 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 
 	// Finally, procees any pending end-of-block state changes
 	err = eval.endOfBlock()
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.enndOfBlock"))  
 	if err != nil {
 		return stateDelta{}, evalAux{}, err
 	}
@@ -738,11 +752,12 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 	// If validating, do final block checks that depend on our new state
 	if validate {
 		err = eval.finalValidation()
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) finalValidation"))  
 		if err != nil {
 			return stateDelta{}, evalAux{}, err
 		}
 	}
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) RETURN"))  
 	return eval.state.mods, *eval.aux, nil
 }
 
@@ -751,7 +766,10 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 // not a valid block (e.g., it has duplicate transactions, overspends some
 // account, etc).
 func (l *Ledger) Validate(ctx context.Context, blk bookkeeping.Block, txcache VerifiedTxnCache, executionPool execpool.BacklogPool) (*ValidatedBlock, error) {
-	delta, aux, err := l.eval(ctx, blk, nil, true, txcache, executionPool)
+	
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/Validate) call eval()"))
+    delta, aux, err := l.eval(ctx, blk, nil, true, txcache, executionPool)
+      
 	if err != nil {
 		return nil, err
 	}

@@ -111,6 +111,7 @@ func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,
 		GenesisHash: tx.GenesisHash[:],
+        TimeIn:      tx.GetTimeIn(),
 	}
 }
 
@@ -141,6 +142,7 @@ func paymentTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,
 		GenesisHash: tx.GenesisHash[:],
+        TimeIn:      tx.GetTimeIn(),
 	}
 }
 

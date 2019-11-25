@@ -18,7 +18,8 @@ package transactions
 
 import (
 	"fmt"
-
+    "time"
+    
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/crypto"
 	"github.com/algorand/go-algorand/data/basics"
@@ -87,6 +88,7 @@ type Header struct {
     RepAdjust   int64             `codec:"repadjust"`
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
+	TimeIn      time.Time         `codec:"timein"`
 }
 
 // Transaction describes a transaction that can appear in a block.
@@ -320,6 +322,10 @@ func (tx Header) GetReviewEval() uint64 {
 // RepAdjust returns the review evaluation reputation adjustment associated with this transaction
 func (tx Header) GetRepAdjust() int64 {
 	return tx.RepAdjust
+}
+
+func (tx Header) GetTimeIn() time.Time {
+    return tx.TimeIn
 }
 
 

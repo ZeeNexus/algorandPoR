@@ -71,7 +71,7 @@ const expiredHistory = 10
 
 // timeoutOnNewBlock determines how long Test() and Remember() wait for
 // OnNewBlock() to process a new block that appears to be in the ledger.
-const timeoutOnNewBlock = time.Second
+const timeoutOnNewBlock = time.Second * 3
 
 // NumExpired returns the number of transactions that expired at the end of a round (only meaningful if cleanup has
 // been called for that round)

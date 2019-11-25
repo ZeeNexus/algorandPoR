@@ -178,7 +178,7 @@ func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) e
 		return errors.New("signedtxn should only have one of Sig or Msig")
 	}
 
-	//if !isReview { // ZZZZ
+	if !isReview { // ZZZZ
         
         if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
             if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
@@ -186,7 +186,7 @@ func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) e
             }
             return nil
         }
- //   }
+    }
 	return nil
 
 }
