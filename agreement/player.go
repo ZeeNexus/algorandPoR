@@ -487,24 +487,24 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 		}()
 
 		ef := r.dispatch(*p, delegatedE, proposalMachine, 0, 0, 0)
-        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2"))
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2"))
 		switch ef.t() {
 		case voteMalformed:
 			err := ef.(filteredEvent).Err
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- malformed"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- malformed"))
 			return append(actions, disconnectAction(e, err))
 		case voteFiltered:
 			err := ef.(filteredEvent).Err
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- filtered"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- filtered"))
 			return append(actions, ignoreAction(e, err))
 		}
 
-        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 3"))
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 3"))
 		if e.t() == votePresent {
 			doneProcessing = false
 			seq := p.Pending.push(e.Tail)
 			uv := e.Input.UnauthenticatedVote
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 4 [%v %v]",uv.R.Round,seq))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 4 [%v %v]",uv.R.Round,seq))
 			return append(actions, verifyVoteAction(e, uv.R.Round, uv.R.Period, seq))
 		}
 		v := e.Input.Vote
@@ -515,7 +515,7 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 				Proposal: ep.Payload.u(),
 				Vote:     v.u(),
 			}
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 5"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 5"))
 			a = broadcastAction(protocol.ProposalPayloadTag, transmit)
 		}
 		logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END PROPOSALVOTE"))
@@ -570,39 +570,39 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 			// TODO Add Metrics here to capture telemetryspec.VoteRejectedEvent details
 			// 	Reason:           fmt.Sprintf("rejected malformed message: %v", e.Err),
 			err := makeSerErrf("rejected message since it was invalid: %v", ef.(filteredEvent).Err)
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteMalformed"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteMalformed"))
 			return append(actions, disconnectAction(e, err))
 		case voteFiltered:
 			err := ef.(filteredEvent).Err
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteFiltered"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteFiltered"))
 			return append(actions, ignoreAction(e, err))
 		}
 		if e.t() == votePresent {
 			uv := e.Input.UnauthenticatedVote
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - votePresent"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - votePresent"))
 			return append(actions, verifyVoteAction(e, uv.R.Round, uv.R.Period, 0))
 		} // else e.t() == voteVerified
 		v := e.Input.Vote
 		actions = append(actions, relayAction(e, protocol.AgreementVoteTag, v.u()))
 		a1 := p.handle(r, ef)
-        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END VOTEPRESENT or VERIFIED"))       
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END VOTEPRESENT or VERIFIED"))       
 		return append(actions, a1...)
 
 	case bundlePresent, bundleVerified:
 		ef := r.dispatch(*p, delegatedE, voteMachine, 0, 0, 0)
-        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent of Verified"))
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent of Verified"))
 		switch ef.t() {
 		case bundleMalformed:
 			err := makeSerErrf("rejected message since it was invalid: %v", ef.(filteredEvent).Err)
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err malformed"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err malformed"))
 			return append(actions, disconnectAction(e, err))
 		case bundleFiltered:
 			err := ef.(filteredEvent).Err
-			logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err filtered"))
+			//logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err filtered"))
 			return append(actions, ignoreAction(e, err))
 		}
 		if e.t() == bundlePresent {
-            logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent - bundlePresent"))
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent - bundlePresent"))
 			ub := e.Input.UnauthenticatedBundle
 			return append(actions, verifyBundleAction(e, ub.Round, ub.Period))
 		}
