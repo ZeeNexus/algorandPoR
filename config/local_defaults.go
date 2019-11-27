@@ -80,8 +80,8 @@ var defaultLocalV4 = Local{
 	ReconnectTime:                         1 * time.Minute, // Was 60ns
 	ReservedFDs:                           256,
 
-	RestReadTimeoutSeconds:                25, // orig 15
-	RestWriteTimeoutSeconds:               180,
+	RestReadTimeoutSeconds:                25, // orig 15, then 25
+	RestWriteTimeoutSeconds:               240, // orig 180
 
 	RunHosted:                             false,
 	SuggestedFeeBlockHistory:              3,

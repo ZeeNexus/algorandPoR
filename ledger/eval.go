@@ -494,7 +494,7 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	var thisTxBytes int
 	cow := eval.state.child()
     isReview := (txn.Txn.Type == protocol.ReviewTx)
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.transaction) BEGIN (gen:%v val:%v rem:%v)", eval.generate, eval.validate, remember))
 
 	spec := transactions.SpecialAddresses{
 		FeeSink:     eval.block.BlockHeader.FeeSink,
@@ -654,6 +654,8 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
         }
 
 	}
+	
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.transaction) END (gen:%v val:%v rem:%v)", eval.generate, eval.validate, remember))
 
 	return nil
 }
