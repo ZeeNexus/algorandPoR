@@ -18,7 +18,7 @@ package transactions
 
 import (
 	"fmt"
-    "time"
+    
     
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/crypto"
@@ -88,7 +88,7 @@ type Header struct {
     RepAdjust   int64             `codec:"repadjust"`
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
-	TimeIn      time.Time         `codec:"timein"`
+	
 }
 
 // Transaction describes a transaction that can appear in a block.
@@ -324,9 +324,7 @@ func (tx Header) GetRepAdjust() int64 {
 	return tx.RepAdjust
 }
 
-func (tx Header) GetTimeIn() time.Time {
-    return tx.TimeIn
-}
+
 
 
 // First returns the first round this transaction is valid

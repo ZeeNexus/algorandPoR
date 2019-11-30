@@ -383,6 +383,8 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
         Message  		string 
         Rating			uint64
         ReviewEval      uint64
+        TimeIn          string
+        TimeSpent       string
     }
 
     var reviewmsg ReviewMessage
@@ -403,9 +405,10 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
    
     outputFile := tmp.Name() + ".json" // filepath.Base(
     
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(before NLP run"))
     
     cmd := exec.Command(config.NLPParams.AlgorandPORFullPath+config.NLPParams.NLPScriptPath, "-file " + tmp.Name() + config.NLPParams.NLPScriptParams)
-  
+    
     
     // error checking
     var out bytes.Buffer
@@ -414,7 +417,7 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
 
     
     err = cmd.Run() // run the command and wait until finished
-    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(after NLP run"))
     
     if err != nil {           
         return ReviewEval, RepAdjust, err, stderr
@@ -432,10 +435,7 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
         errmsg := fmt.Sprintf("ZZZZERROR(read) %v ZZZZEND", err)
         logging.Base().Info(errmsg)
     }
-  
-    //infomsg = fmt.Errorf("ZZZZINFO(json) %v ZZZZEND", rawjsonbytes)    
-    //logging.Base().Info(infomsg) 
-        
+          
     var result map[string]interface{}
     json.Unmarshal(rawjsonbytes, &result) //[]byte(rawjsonbytes)
  

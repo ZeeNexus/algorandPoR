@@ -548,7 +548,7 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 		case proposalCommittable:
 			uv = ef.(committableEvent).Vote.u()
 		}
-		up := e.Input.UnauthenticatedProposal
+		up := e.Input.UnauthenticatedProposal // up is a proposal with an originalproposer address
 
 		a := relayAction(e, protocol.ProposalPayloadTag, compoundMessage{Proposal: up, Vote: uv})
 		actions = append(actions, a)

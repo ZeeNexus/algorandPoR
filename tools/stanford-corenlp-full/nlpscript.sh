@@ -9,7 +9,7 @@
 #    ./nlpscript.sh
 # ./nlpscript.sh -file input.txt -outputFormat json
 # ./nlpscript.sh -file input.txt -outputFormat json -outputDirectory /tmp
-
+# -parse.model edu/stanford/nlp/models/srparser/englishSR.ser.gz
 
 OS=`uname`
 # Some machines (older OS X, BSD, Windows environments) don't support readlink -e
@@ -22,3 +22,4 @@ fi
 
 echo java -mx2g -cp \"$scriptdir/*\" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,parse,sentiment $*
 java -mx2g -cp "$scriptdir/*" edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,parse,sentiment $*
+
