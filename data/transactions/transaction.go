@@ -324,7 +324,10 @@ func (tx Header) GetRepAdjust() int64 {
 	return tx.RepAdjust
 }
 
-
+// GetTimeIn returns the time in associated with this transaction
+func (tx Header) GetTimeIn() string {
+	return tx.GenesisID // TODO maybe we dont need, since timein is stored in the note of a message. using GenesisID since it's a string instead of JSON unmarshalling the note
+}
 
 
 // First returns the first round this transaction is valid

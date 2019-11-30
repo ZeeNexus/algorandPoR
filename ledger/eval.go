@@ -22,12 +22,13 @@ import (
 	"errors"    
 	"fmt"
     "bytes"
-   // "time"
+    "time"
     "math"
 	"io/ioutil"
     "os"
 	"os/exec"
     "strconv"
+    "math/rand"
    // "path/filepath"
    // "strings"
     
@@ -359,9 +360,33 @@ func (eval *BlockEvaluator) TestTransaction(txn transactions.SignedTxn, ad *tran
 
 
 
-
-
-
+// Test the evalateReview by simulating an evaluation.
+func evaluateReviewTest(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust int64, err error, stderr bytes.Buffer) {
+        
+    reviewEval := 100 // 100 being 100% positive, 0 being 0% positive review
+    repAdjust  := 2   // negative or non-negative numbers to decrease or increase, respectively
+ 
+    reviewRate := txn.Txn.GetReviewRate() // on a 5 pt scale
+    reviewRateX := int(reviewRate) * 20        //(expand to 0-100 scale)
+ 
+    // get random # to simulate evaluation
+    rand.Seed(time.Now().UnixNano())
+    min := 0
+    max := 100
+    reviewEval = rand.Intn(max - min + 1) + min
+    
+    // compare to rating    
+    if (reviewRateX > reviewEval && ((reviewRateX-reviewEval) <= 20)) || (reviewEval > reviewRateX && ((reviewEval-reviewRateX) <= 20)) {
+        repAdjust = 1
+    } else if (reviewRateX == reviewEval) {
+        repAdjust = 2
+    } else {
+        repAdjust = -1
+    }
+    
+    // return the values in the header of the transaction    
+    return uint64(reviewEval), int64(repAdjust), nil, stderr
+}
 
 
 // Evaluate a review and add evaluation and repuation adjustment 
@@ -389,9 +414,7 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     }
 
     var reviewmsg ReviewMessage
-    err = json.Unmarshal(reviewNote, &reviewmsg)
-
-    
+    err = json.Unmarshal(reviewNote, &reviewmsg)    
     
     ///////////////////////////////////////////////////////////////////////
     // Evaluate the review
@@ -441,11 +464,10 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     json.Unmarshal(rawjsonbytes, &result) //[]byte(rawjsonbytes)
  
     infomsg := fmt.Errorf("ZZZZINFO(resultstr) %v ZZZZEND", result)    
-    logging.Base().Info(infomsg)    
-    
+    logging.Base().Info(infomsg)        
 
 	Sentences := result["sentences"].([]interface{})
-	// fmt.Println("len:", len(Sentences)) 
+	 
       
     SentimentTotal := 0
     SentimentSentences := len(Sentences)
@@ -456,12 +478,9 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
 		sentdata := sentences.(map[string]interface{})
 		for key, value := range sentdata {
 			if key == "sentimentValue" {
-				//fmt.Println(key, value)
-                 
                 var sentimentValue, err = strconv.Atoi((value.(string))) 
                 if err != nil {}
-                SentimentTotal += sentimentValue                
-                
+                SentimentTotal += sentimentValue                    
 			}		
 		}        
     } 
@@ -469,12 +488,7 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     //////////////////////////////////////////////// 
     // calculate the average and convert to 0-100 scale
     ReviewEval = uint64(math.Round((float64(SentimentTotal) / float64(SentimentSentences)) * 20))
-   
-    
-    // magic happening here. bippity boppity    
-	if(bytes.Index(reviewNote, []byte("decrease")) >= 0) {
-		RepAdjust = -1		
-    }  
+  
     
     // reviewRate compare and change the adjust
         
@@ -509,10 +523,10 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
        // var reviewRate = txn.Txn.GetReviewRate()
         var stderr bytes.Buffer
         
-        eval, adjust, err, stderr := evaluateReview(txn)
+        // eval, adjust, err, stderr := evaluateReview(txn)  // TODO fully
+        eval, adjust, err, stderr := evaluateReviewTest(txn) // TEST
         
-        if err != nil { 
-            
+        if err != nil {             
             return fmt.Errorf("erorororor: %v: %v", err, stderr.String()) 
             //fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
         } 

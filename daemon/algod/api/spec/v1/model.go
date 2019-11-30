@@ -214,7 +214,7 @@ type Transaction struct {
 	
 	RepAdjust   int64 `json:"repadjust,omitempty"`
 	
-	TimeIn      time.Time `json:"timein,omitempty"`
+	TimeIn      string `json:"timein,omitempty"`
 
 
 	// ConfirmedRound indicates the block number this transaction appeared in
