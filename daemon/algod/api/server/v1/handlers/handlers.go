@@ -107,11 +107,12 @@ func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		Note:        tx.Aux(),
 		ReviewNote:  tx.GetReviewNote(),
 		ReviewRate:	 tx.GetReviewRate(),
+		ReviewEval   tx.GetReviewEval(),
 		Payment:     &payment,
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,
 		GenesisHash: tx.GenesisHash[:],
-        
+        TimeIn:      tx.GetTimeIn(),
 	}
 }
 
@@ -169,6 +170,10 @@ func keyregTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		GenesisHash: tx.GenesisHash[:],
 	}
 }
+
+
+
+
 
 func txWithStatusEncode(tr node.TxnWithStatus) (v1.Transaction, error) {
 	s, err := txEncode(tr.Txn.Txn, tr.ApplyData)

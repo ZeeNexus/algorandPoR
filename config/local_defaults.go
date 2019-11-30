@@ -52,7 +52,9 @@ var defaultLocalV4 = Local{
 	CatchupParallelBlocks:                 50,
 	ConnectionsRateLimitingCount:          60,
 	ConnectionsRateLimitingWindowSeconds:  1,
+
 	DeadlockDetection:                     -1,  //orig 0, negative (-1) to disable, positive (1) to enable, 0 for default
+
 	DNSBootstrapID:                        "<network>.algorand.network",
 	EnableAgreementReporting:              false,
 	EnableAgreementTimeMetrics:            false,
@@ -77,8 +79,10 @@ var defaultLocalV4 = Local{
 	OutgoingMessageFilterBucketSize:       128,
 	ReconnectTime:                         1 * time.Minute, // Was 60ns
 	ReservedFDs:                           256,
-	RestReadTimeoutSeconds:                25, // orig 15
-	RestWriteTimeoutSeconds:               180,
+
+	RestReadTimeoutSeconds:                25, // orig 15, then 25
+	RestWriteTimeoutSeconds:               240, // orig 180
+
 	RunHosted:                             false,
 	SuggestedFeeBlockHistory:              3,
 	SuggestedFeeSlidingWindowSize:         50,
