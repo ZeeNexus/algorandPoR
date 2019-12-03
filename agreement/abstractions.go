@@ -132,9 +132,6 @@ type LedgerReader interface {
 	// protocol may lose liveness.
 	BalanceRecord(basics.Round, basics.Address) (basics.BalanceRecord, error)
 
-
-	ReputationCirculation(basics.Round) (basics.Reputation, error)
-
 	// Circulation returns the total amount of money in circulation at the
 	// conclusion of a given round.
 	//
@@ -143,7 +140,6 @@ type LedgerReader interface {
 	// unavailable by the storage device. In that case, the agreement
 	// protocol may lose liveness.
 	Circulation(basics.Round) (basics.MicroAlgos, error)
-
 
 	// LookupDigest returns the Digest of the entry that was agreed on in a
 	// given round.

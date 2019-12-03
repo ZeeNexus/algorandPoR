@@ -106,11 +106,6 @@ func (i ledgerImpl) BalanceRecord(r basics.Round, addr basics.Address) (basics.B
 	return i.l.BalanceRecord(r, addr)
 }
 
-
-func (i ledgerImpl) ReputationCirculation(r basics.Round) (basics.Reputation, error) {
-	return basics.Reputation{}, nil
-}
-
 // Circulation implements Ledger.Circulation.
 func (i ledgerImpl) Circulation(r basics.Round) (basics.MicroAlgos, error) {
 	return i.l.Circulation(r)

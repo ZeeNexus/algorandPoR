@@ -74,13 +74,6 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 		return
 	}
 
-	totalRep, err := l.ReputationCirculation(balanceRound)
-	if err != nil {
-		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain total reoutation circulation in round %v: %v", r, balanceRound, err)
-		return
-	}
-
-
 	seed, err := l.Seed(seedRound)
 	if err != nil {
 		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain seed in round %v: %v", r, seedRound, err)
@@ -90,6 +83,5 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 	m.Record = record
 	m.Selector = selector{Seed: seed, Round: r, Period: p, Step: s}
 	m.TotalMoney = total
-	m.TotalReputation = totalRep
 	return m, nil
 }
