@@ -31,7 +31,8 @@ import (
 	"github.com/algorand/go-algorand/util/codecs"
 )
 
-const RepDefaultInitVal = 100000
+// default initial repuation value when new. Instead of '1', we needed a large number to make the repuation-as-stake system happy
+const RepDefaultInitVal = 100001 
 
 // Devnet identifies the 'development network' use for development and not generally accessible publicly
 const Devnet protocol.NetworkID = "devnet"
