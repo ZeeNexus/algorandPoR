@@ -31,8 +31,6 @@ import (
 	"github.com/algorand/go-algorand/util/codecs"
 )
 
-const RepDefaultInitVal = 100000
-
 // Devnet identifies the 'development network' use for development and not generally accessible publicly
 const Devnet protocol.NetworkID = "devnet"
 

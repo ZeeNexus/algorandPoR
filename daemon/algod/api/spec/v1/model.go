@@ -208,14 +208,14 @@ type Transaction struct {
 	//
 	// required: false
 	// swagger:strfmt byte
-	ReviewNote []byte `json:"reviewnoteb64"`
-
-    ReviewRate  uint64 `json:"reviewrate,omitempty"`
-
+	ReviewNote []byte `json:"reviewnoteb64"`	
+	
+    ReviewRate  uint64 `json:"reviewrate,omitempty"`	
+	
 	ReviewEval  uint64 `json:"revieweval,omitempty"`
-
+	
 	RepAdjust   int64 `json:"repadjust,omitempty"`
-
+	
 	// ConfirmedRound indicates the block number this transaction appeared in
 	//
 	// required: false
@@ -511,12 +511,6 @@ type Supply struct {
 	//
 	// required: true
 	TotalMoney uint64 `json:"totalMoney"`
-
-
-	//Reputation, for now trying to mimic stake in the lifecycle for review
-	TotalReputation uint64 `json:"totalReputation"`
-	OnlineReputation uint64 `json:"onlineReputation"`
-
 
 	// OnlineMoney
 	//

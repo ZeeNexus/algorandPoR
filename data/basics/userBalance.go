@@ -200,18 +200,6 @@ func (u AccountData) VotingStake() MicroAlgos {
 	return u.MicroAlgos
 }
 
-
-func (u AccountData) RepVotingStake() Reputation {
-	if u.Status != Online {
-		return Reputation{Raw: 0}
-	}
-
-	return u.Reputation
-}
-
-
-
-
 // KeyDilution returns the key dilution for this account,
 // returning the default key dilution if not explicitly specified.
 func (u AccountData) KeyDilution(proto config.ConsensusParams) uint64 {

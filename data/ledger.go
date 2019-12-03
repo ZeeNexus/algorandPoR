@@ -204,18 +204,6 @@ func (l *Ledger) Circulation(r basics.Round) (basics.MicroAlgos, error) {
 	return totals.Online.Money, nil
 }
 
-
-func (l *Ledger) ReputationCirculation(r basics.Round) (basics.Reputation, error) {
-	totals, err := l.Totals(r)
-	if err != nil {
-		return basics.Reputation{}, err
-	}
-
-	return totals.Online.Reputation, nil
-}
-
-
-
 // Seed gives the VRF seed that was agreed on in a given round,
 // returning an error if we don't have that round or we have an
 // I/O error.

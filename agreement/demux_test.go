@@ -492,14 +492,6 @@ func (t *demuxTester) Circulation(basics.Round) (basics.MicroAlgos, error) {
 	return basics.MicroAlgos{}, nil
 }
 
-
-func (t *demuxTester) ReputationCirculation(basics.Round) (basics.Reputation, error) {
-	// we don't care about this function in this test.
-	return basics.Reputation{}, nil
-}
-
-
-
 // implement Ledger
 func (t *demuxTester) ConsensusParams(basics.Round) (config.ConsensusParams, error) {
 	// we don't care about this function in this test.

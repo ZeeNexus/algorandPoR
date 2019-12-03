@@ -213,13 +213,6 @@ func (l *testLedger) BalanceRecord(r basics.Round, a basics.Address) (basics.Bal
 	return l.state[a], nil
 }
 
-
-func (l *testLedger) ReputationCirculation(r basics.Round) (basics.Reputation, error) {
-	return basics.Reputation{}, nil
-}
-
-
-
 func (l *testLedger) Circulation(r basics.Round) (basics.MicroAlgos, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
