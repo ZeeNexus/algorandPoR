@@ -88,7 +88,7 @@ var defaultLocalV4 = Local{
 	SuggestedFeeSlidingWindowSize:         50,
 	TxPoolExponentialIncreaseFactor:       2,
 	TxPoolSize:                            50000,
-	TxSyncIntervalSeconds:                 60,
+	TxSyncIntervalSeconds:                 60, // orig 60
 	TxSyncTimeoutSeconds:                  30,
 	TxSyncServeResponseSize:               1000000,
 	// DO NOT MODIFY VALUES - New values may be added carefully - See WARNING at top of file

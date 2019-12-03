@@ -321,7 +321,7 @@ func (tx Header) GetReviewEval() uint64 {
 
 // RepAdjust returns the review evaluation reputation adjustment associated with this transaction
 func (tx Header) GetRepAdjust() int64 {
-	return tx.RepAdjust
+	return tx.RepAdjust 
 }
 
 // GetTimeIn returns the time in associated with this transaction

@@ -108,6 +108,7 @@ func reviewTxEncode(tx transactions.Transaction, ad transactions.ApplyData) v1.T
 		ReviewNote:  tx.GetReviewNote(),
 		ReviewRate:	 tx.GetReviewRate(),
 		ReviewEval:  tx.GetReviewEval(),
+		RepAdjust:   tx.GetRepAdjust(),
 		Payment:     &payment,
 		FromRewards: ad.SenderRewards.Raw,
 		GenesisID:   tx.GenesisID,

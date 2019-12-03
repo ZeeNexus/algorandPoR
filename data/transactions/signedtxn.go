@@ -222,7 +222,7 @@ func (s SignedTxn) PoolVerify(spec SpecialAddresses, proto config.ConsensusParam
 func (s SignedTxn) asyncVerify(arg interface{}) interface{} {
 	outCh := arg.(chan error)
     isReview := (s.Txn.Type == protocol.ReviewTx)
-    if !isReview {
+    if !isReview  {
         if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
             if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
                 outCh <- errors.New("signature (and multisig) failed to verify")

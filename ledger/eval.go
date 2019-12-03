@@ -359,15 +359,29 @@ func (eval *BlockEvaluator) TestTransaction(txn transactions.SignedTxn, ad *tran
 }
 
 
-
+/////////////////////////////////////////////////////////////////////
+// TEST Evaluate Review
 // Test the evalateReview by simulating an evaluation.
 func evaluateReviewTest(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust int64, err error, stderr bytes.Buffer) {
         
-    reviewEval := 100 // 100 being 100% positive, 0 being 0% positive review
-    repAdjust  := 2   // negative or non-negative numbers to decrease or increase, respectively
- 
-    reviewRate := txn.Txn.GetReviewRate() // on a 5 pt scale
-    reviewRateX := int(reviewRate) * 20        //(expand to 0-100 scale)
+    ///////////////////////////////////
+    // get values in current tx header
+    // reviewEval: 100 being 100% positive, 0 being 0% positive review
+    // repAdjust:  negative or non-negative numbers to decrease or increase, respectively
+    reviewRate  := txn.Txn.GetReviewRate() // on a 5 pt scale scaled to
+    reviewRateX := int(reviewRate)         // 0-100 scale (*20) in dApp    
+    repAdjust   := txn.Txn.GetRepAdjust() 
+    reviewEval  := int(txn.Txn.GetReviewEval()) 
+    
+    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(IN EVAL TEST) eval:%v adjust:%v", reviewEval, repAdjust)) 
+    ///////////////////////////////////
+    // check if not first time doing this. only allow one evaluation from proposer
+    if !(repAdjust <= -9999) {        
+        _, err := stderr.WriteString("exists")
+        if err != nil {}
+        return uint64(reviewEval), int64(repAdjust), nil, stderr
+    }
  
     // get random # to simulate evaluation
     rand.Seed(time.Now().UnixNano())
@@ -389,22 +403,29 @@ func evaluateReviewTest(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjus
 }
 
 
+
+
+/////////////////////////////////////////////////////////////////////
+// LIVE Evaluate Review
 // Evaluate a review and add evaluation and repuation adjustment 
 // suggestion to header of the Review transaction
 func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust int64, err error, stderr bytes.Buffer) {
-    var reviewNote = txn.Txn.GetReviewNote()
-    // var reviewRate = txn.Txn.GetReviewRate()            
-	
-    ReviewEval  = 100 // 100 being 100% positive, 0 being 0% positive review
-    RepAdjust   = 2   // negative or non-negative numbers to decrease or increase, respectively
-    // text := "This is the best review that is good fantastic fun"
-
+    
+    ///////////////////////////////////
+    // get values in current tx header
+    // reviewEval: 100 being 100% positive, 0 being 0% positive review
+    // repAdjust:  negative or non-negative numbers to decrease or increase, respectively
+    reviewRate  := txn.Txn.GetReviewRate() // on a 5 pt scale scaled to
+    reviewRateX := int(reviewRate)         // 0-100 scale (*20) in dApp    
+    repAdjust   := txn.Txn.GetRepAdjust() 
+    reviewEval  := int(txn.Txn.GetReviewEval()) 
+    
     type ReviewMessage struct {
         Addr     		string
-        Reputation	string
-        Round				string
-        RepAdjust   string
-        Type				string
+        Reputation	    string
+        Round			string
+        RepAdjust       string
+        Type			string
         Username 		string 
         Message  		string 
         Rating			uint64
@@ -413,12 +434,15 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
         TimeSpent       string
     }
 
+    // unmarshal the reviewnote into a reviewmessage struct
+    var reviewNote = txn.Txn.GetReviewNote()     
     var reviewmsg ReviewMessage
     err = json.Unmarshal(reviewNote, &reviewmsg)    
     
+    
     ///////////////////////////////////////////////////////////////////////
     // Evaluate the review
-    /////////////////////////   
+    ///////////////////////////////////////////////////////////////////////  
         
 	// create tmp file which write the input text
 	tmp, err := ioutil.TempFile("", "go-corenlp")
@@ -427,21 +451,16 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
 
 	tmp.WriteString(reviewmsg.Message)
    
-    outputFile := tmp.Name() + ".json" // filepath.Base(
-    
-    logging.Base().Info(fmt.Errorf("ZZZZINFO(before NLP run"))
-    
-    cmd := exec.Command(config.NLPParams.AlgorandPORFullPath+config.NLPParams.NLPScriptPath, "-file " + tmp.Name() + config.NLPParams.NLPScriptParams)
-    
+    outputFile := tmp.Name() + ".json"     
+   
+    cmd := exec.Command(config.NLPParams.AlgorandPORFullPath+config.NLPParams.NLPScriptPath, "-file " + tmp.Name() + config.NLPParams.NLPScriptParams)    
     
     // error checking
     var out bytes.Buffer
     cmd.Stdout = &out
     cmd.Stderr = &stderr  
-
     
-    err = cmd.Run() // run the command and wait until finished
-    logging.Base().Info(fmt.Errorf("ZZZZINFO(after NLP run"))
+    err = cmd.Run() // run the command and wait until finished    
     
     if err != nil {           
         return ReviewEval, RepAdjust, err, stderr
@@ -456,15 +475,13 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     defer os.Remove(outputFile) 
  
     if err != nil {
-        errmsg := fmt.Sprintf("ZZZZERROR(read) %v ZZZZEND", err)
-        logging.Base().Info(errmsg)
+        logging.Base().Info(fmt.Sprintf("ZZZZERROR(read error) %v ZZZZEND", err))
     }
           
     var result map[string]interface{}
-    json.Unmarshal(rawjsonbytes, &result) //[]byte(rawjsonbytes)
- 
-    infomsg := fmt.Errorf("ZZZZINFO(resultstr) %v ZZZZEND", result)    
-    logging.Base().Info(infomsg)        
+    json.Unmarshal(rawjsonbytes, &result) 
+     
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(resultstr) %v ZZZZEND", result) )        
 
 	Sentences := result["sentences"].([]interface{})
 	 
@@ -487,17 +504,29 @@ func evaluateReview(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjust in
     
     //////////////////////////////////////////////// 
     // calculate the average and convert to 0-100 scale
-    ReviewEval = uint64(math.Round((float64(SentimentTotal) / float64(SentimentSentences)) * 20))
+    reviewEval = int(math.Round((float64(SentimentTotal) / float64(SentimentSentences)) * 20))
   
     
-    // reviewRate compare and change the adjust
+    ///////////////////////////////////////////
+    // compare to rating    
+    if (reviewRateX > reviewEval && ((reviewRateX-reviewEval) <= 20)) || (reviewEval > reviewRateX && ((reviewEval-reviewRateX) <= 20)) {
+        repAdjust = 1
+    } else if (reviewRateX == reviewEval) {
+        repAdjust = 2
+    } else {
+        repAdjust = -1
+    }
         
     
     // return the values in the header of the transaction    
-    return ReviewEval, RepAdjust, nil, stderr
+    return uint64(reviewEval), int64(repAdjust), nil, stderr
 }
 
 
+
+
+
+///////////////////////////////////////////////////////////////////////////////////
 // transaction tentatively executes a new transaction as part of this block evaluation.
 // If the transaction cannot be added to the block without violating some constraints,
 // an error is returned and the block evaluator state is unchanged.  If remember is true,
@@ -515,40 +544,39 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		RewardsPool: eval.block.BlockHeader.RewardsPool,
 	}
 	
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(TID Before):%v", txn.ID()))
 
-	//////////////////////////////////////
+	///////////////////////////////////////////
 	// handle evaluating review as proposer zz
 	if  isReview && eval.generate && remember {
-       // var reviewNote = txn.Txn.GetReviewNote()
-       // var reviewRate = txn.Txn.GetReviewRate()
+
         var stderr bytes.Buffer
         
-        // eval, adjust, err, stderr := evaluateReview(txn)  // TODO fully
+        //eval, adjust, err, stderr := evaluateReview(txn)  // TODO LIVE (needs tweaking for speed)
         eval, adjust, err, stderr := evaluateReviewTest(txn) // TEST
         
         if err != nil {             
-            return fmt.Errorf("erorororor: %v: %v", err, stderr.String()) 
-            //fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+            return fmt.Errorf("erorororor: %v: %v", err, stderr.String())             
         } 
         
-        txn.Txn.Header.ReviewEval = eval
-        txn.Txn.Header.RepAdjust = adjust
+        if !(stderr.String() == "exists") {
+            logging.Base().Info(fmt.Errorf("ZZZZINFO(DOES NOT EXIST YET)")) 
+            txn.Txn.Header.ReviewEval = eval
+            txn.Txn.Header.RepAdjust = adjust            
+        }
+        
+
         logging.Base().Info(fmt.Errorf("ZZZZINFO(after eval review) eval:%v adjust:%v", eval, adjust)) 
-        
-        
-         
-        
+  
         
         //txn.ResetCaches()  // tx changed so we need to reset the computed hashed id in tx
-        //txn.InitCaches()
-        
+        //txn.InitCaches()      
         
         
         //return fmt.Errorf("rn: %v ", reviewNote) 
         //return fmt.Errorf("eval: %v rate: %v adjust: %v", txn.Txn.GetReviewEval(), txn.Txn.GetReviewRate(),txn.Txn.GetRepAdjust())  
-
     }	
-    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(TID AFTER):%v", txn.ID()))
     
     
 	if eval.validate {
@@ -574,7 +602,7 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		}
 
 		// Properly signed?
-		if eval.txcache == nil || !eval.txcache.Verified(txn) {
+		if (eval.txcache == nil || !eval.txcache.Verified(txn)) { // && !isReview {
 			err = txn.PoolVerify(spec, eval.proto, eval.verificationPool)
 			if err != nil {
 				return fmt.Errorf("transaction %v: failed to verify: %v", txn.ID(), err)
@@ -606,19 +634,21 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	}
 
 	
-
 	
 	// Check if the transaction fits in the block, now that we can encode it.
 	txib, err := eval.block.EncodeSignedTxn(txn, applyData)
 	if err != nil {
 		return err
 	}
+
 	if eval.validate {
 		thisTxBytes = len(protocol.Encode(txib))
 		if eval.totalTxBytes+thisTxBytes > eval.proto.MaxTxnBytesPerBlock {
 			return ErrNoSpace
 		}
 	}
+	
+	
 
 	// Check if any affected accounts dipped below MinBalance (unless they are
 	// completely zero, which means the account will be deleted.)
@@ -657,16 +687,11 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	if remember {
 		// Remember this TXID (to detect duplicates)
 		cow.addTx(txn.ID())
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(REMEMBER) %v)", txn.ID()))
 
 		eval.block.Payset = append(eval.block.Payset, txib)
 		eval.totalTxBytes += thisTxBytes
 		cow.commitToParent()
-
-        if  isReview && eval.generate {
-        //return fmt.Errorf("review transaction %v: rate: %v adjust: %v",
-				//txn.ID(), txn.Txn.GetReviewRate(),txn.Txn.GetRepAdjust())
-        }
-
 	}
 	
 	logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.transaction) END (gen:%v val:%v rem:%v)", eval.generate, eval.validate, remember))

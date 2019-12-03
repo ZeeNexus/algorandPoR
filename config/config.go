@@ -57,7 +57,7 @@ type NLP struct {
 
 // This is used across all nodes we create.
 var NLPParams = NLP{
-	AlgorandPORFullPath: "/home/zachary/algorandPoR/",
+	AlgorandPORFullPath: "/home/zach/algorandPoR/",
 	NLPScriptPath:   "tools/stanford-corenlp-full/nlpscript.sh",
     NLPScriptParams: " -outputFormat json -outputDirectory /tmp", // note the first space
 }
