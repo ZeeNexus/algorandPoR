@@ -163,6 +163,8 @@ func (s *SignedTxn) PtrPriority() TxnPriority {
 // Note that this does not check whether a payset is valid against the ledger:
 // a SignedTxn may be well-formed, but a payset might contain an overspend.
 func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) error {
+    isReview := (s.Txn.Type == protocol.ReviewTx)
+    
 	if err := s.Txn.WellFormed(spec, proto); err != nil {
 		return err
 	}
@@ -176,12 +178,15 @@ func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) e
 		return errors.New("signedtxn should only have one of Sig or Msig")
 	}
 
-	if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
-		if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
-			return errors.New("signature (and multisig) failed to verify")
-		}
-		return nil
-	}
+	if !isReview { // ZZZZ
+        
+    //    if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
+    //        if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
+    //            return errors.New("signature (and multisig) failed to verify")
+    //        }
+    //        return nil
+    //    }
+    }
 	return nil
 
 }
@@ -216,11 +221,14 @@ func (s SignedTxn) PoolVerify(spec SpecialAddresses, proto config.ConsensusParam
 
 func (s SignedTxn) asyncVerify(arg interface{}) interface{} {
 	outCh := arg.(chan error)
-	if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
-		if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
-			outCh <- errors.New("signature (and multisig) failed to verify")
-		}
-	}
+    isReview := (s.Txn.Type == protocol.ReviewTx)
+    if !isReview  {
+        if !crypto.SignatureVerifier(s.Txn.Src()).Verify(s.Txn, s.Sig) {
+            if ok, _ := crypto.MultisigVerify(s.Txn, crypto.Digest(s.Txn.Src()), s.Msig); !ok {
+                outCh <- errors.New("signature (and multisig) failed to verify")
+            }
+        }
+    }
 	close(outCh)
 	return nil
 }

@@ -62,11 +62,13 @@ type blockValidatorImpl struct {
 // Validate implements BlockValidator.Validate.
 func (i blockValidatorImpl) Validate(ctx context.Context, e bookkeeping.Block) (agreement.ValidatedBlock, error) {
 	b := &e
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(impls.go/Validate) call eval.Validate")) 
 	lvb, err := i.l.Validate(ctx, *b, i.tp, i.verificationPool)
+     
 	if err != nil {
 		return nil, err
 	}
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(impls.go/Validate) RETURN")) 
 	return validatedBlock{vb: lvb}, nil
 }
 
@@ -89,7 +91,10 @@ func makeBlockFactory(l *data.Ledger, tp *pools.TransactionPool, logStats bool, 
 
 // AssembleBlock implements Ledger.AssembleBlock.
 func (i *blockFactoryImpl) AssembleBlock(round basics.Round, deadline time.Time) (agreement.ValidatedBlock, error) {
+    
 	start := time.Now()
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(impls.go/AssembleBlock) BEGIN ASSEMBLEBLOCK(%v)", start))  
+    
 	prev, err := i.l.BlockHdr(round - 1)
 	if err != nil {
 		return nil, fmt.Errorf("could not make proposals at round %d: could not read block from ledger: %v", round, err)
@@ -121,7 +126,8 @@ func (i *blockFactoryImpl) AssembleBlock(round basics.Round, deadline time.Time)
 		details.Round = uint64(round)
 		logging.Base().Metrics(telemetryspec.Transaction, stats, details)
 	}
-
+	
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(impls.go/AssembleBlock) END ASSEMBLEBLOCK RETURN"))  
 	return validatedBlock{vb: lvb}, nil
 }
 

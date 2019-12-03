@@ -257,8 +257,9 @@ func (l *Ledger) ConsensusVersion(r basics.Round) (protocol.ConsensusVersion, er
 // written to the ledger.
 func (l *Ledger) EnsureValidatedBlock(vb *ledger.ValidatedBlock, c agreement.Certificate) {
 	round := vb.Block().Round()
-
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(ledger.go/EnsureValidatedBlock) BEGIN (lastr:%v r:%v)", l.LastRound(), round))
 	for l.LastRound() < round {
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(ledger.go/EnsureValidatedBlock) LOOP (lastr:%v r:%v)", l.LastRound(), round))
 		err := l.AddValidatedBlock(*vb, c)
 		if err == nil {
 			break
@@ -345,8 +346,9 @@ func (*Ledger) AssemblePayset(pool *pools.TransactionPool, eval *ledger.BlockEva
 				// logAt = Warn
 				stats.InvalidCount++
 			}
-
+            
 			logAt(msg)
+            
 		} else {
 			fee := txn.Txn.Fee.Raw
 			encodedLen := txn.GetEncodedLength()

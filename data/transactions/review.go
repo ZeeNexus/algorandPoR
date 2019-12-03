@@ -17,7 +17,9 @@
 package transactions
 
 import (
-	"bytes"
+
+	//"bytes"
+
 
 	"fmt"
     // "log"
@@ -41,7 +43,7 @@ type ReviewTxnFields struct {
 }
 
 
-
+/*
 
 // Evaluate a review and add evaluation and repuation adjustment 
 // suggestion to header of the Review transaction
@@ -69,6 +71,7 @@ func evaluateReview(header *Header) {
     header.RepAdjust = RepAdjust
 }
 
+*/
 
 
 
@@ -90,7 +93,7 @@ func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddr
 		}
 	}
 	
-	// evaluateReview(&header)
+
 	
 	
 	
@@ -117,20 +120,9 @@ func (review ReviewTxnFields) apply(header Header, balances Balances, spec Speci
 		}
 	}
 
-	//XDDLG TODO: Here for now for testing update of reputation as part of an approved review.
-	// Prob need to be inside a tx.ReviewTxnFields.apply() in transaction.go
-	// and the note is just to prove increase decrease
-	// - Delete bytes import as well
-	
-	//var updateVal int64 = 5
-	//if(bytes.Index(header.ReviewNote, []byte("decrease")) >= 0) {
-	//	updateVal = -1
-	//}
-	//balances.UpdateReputation(header.Sender, updateVal)
+    //evaluateReview(&header)    
+    //balances.UpdateReputation(header.Sender, 2)
 
-    evaluateReview(&header)
-    
-    
     balances.UpdateReputation(header.Sender, header.RepAdjust)
     // log.Printf("%v %v\n", header.RepAdjust, header.ReviewEval)
 

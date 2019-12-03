@@ -1,6 +1,6 @@
- 
 
 algorand-por
+
 ====================
 Algorand PoR's official implementation in Go.
 
@@ -8,7 +8,22 @@ Algorand is a permissionless, pure proof-of-stake blockchain that delivers decen
 
 ## Getting Started ##
 
-Our [developer website][developer site url] has the most up to date information about using and installing the algorand platform.
+You will need both "git" (git >=1.8.2) installed and "git lfs" installed. "git lfs" is used to manage the large files in this branch (currently, they are JAR files in the NLP /tools/ directory). 
+
+to install "git lfs" on Ubuntu
+
+```bash
+sudo apt-get install git-lfs
+# change to directory to the repository (e.g. AlgorandPoR/)
+git lfs install
+```
+
+After LFS is installed for a repository, you can pull the large files during/after checkout: (it doesn't pull them during the initial checkout of a branch)
+
+```bash
+git lfs pull
+```
+
 
 ## Building from source ##
 
