@@ -17,6 +17,12 @@
 // Package v1 defines models exposed by algod rest api
 package v1
 
+
+
+import (
+    
+)
+
 // NodeStatus contains the information about a node status
 // swagger:model NodeStatus
 type NodeStatus struct {
@@ -210,11 +216,14 @@ type Transaction struct {
 	// swagger:strfmt byte
 	ReviewNote []byte `json:"reviewnoteb64"`
 
-    ReviewRate  uint64 `json:"reviewrate,omitempty"`
+  ReviewRate  uint64 `json:"reviewrate,omitempty"`
 
 	ReviewEval  uint64 `json:"revieweval,omitempty"`
 
 	RepAdjust   int64 `json:"repadjust,omitempty"`
+	
+	TimeIn      string `json:"timein,omitempty"`
+
 
 	// ConfirmedRound indicates the block number this transaction appeared in
 	//

@@ -345,7 +345,8 @@ func (l *Ledger) AddBlock(blk bookkeeping.Block, cert agreement.Certificate) err
 // the block has previously been validated.  Otherwise, AddValidatedBlock
 // behaves like AddBlock.
 func (l *Ledger) AddValidatedBlock(vb ValidatedBlock, cert agreement.Certificate) error {
-	// Grab the tracker lock first, to ensure newBlock() is notified before committedUpTo().
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(ledger.go/AddValidatedBlock)"))
+    // Grab the tracker lock first, to ensure newBlock() is notified before committedUpTo().
 	l.trackerMu.Lock()
 	defer l.trackerMu.Unlock()
 

@@ -18,9 +18,11 @@ package agreement
 
 import (
 	"time"
+    "fmt"
 
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/protocol"
+    "github.com/algorand/go-algorand/logging"
 )
 
 // The player implements the top-level state machine functionality of the
@@ -467,6 +469,7 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 
 	// if so, process it separately
 	if proposalVote {
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) BEGIN PROPOSALVOTE"))
 		doneProcessing := true // TODO check that this is still required
 		defer func() {
 			tail := e.Tail
@@ -484,19 +487,24 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 		}()
 
 		ef := r.dispatch(*p, delegatedE, proposalMachine, 0, 0, 0)
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2"))
 		switch ef.t() {
 		case voteMalformed:
 			err := ef.(filteredEvent).Err
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- malformed"))
 			return append(actions, disconnectAction(e, err))
 		case voteFiltered:
 			err := ef.(filteredEvent).Err
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 2- filtered"))
 			return append(actions, ignoreAction(e, err))
 		}
 
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 3"))
 		if e.t() == votePresent {
 			doneProcessing = false
 			seq := p.Pending.push(e.Tail)
 			uv := e.Input.UnauthenticatedVote
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 4 [%v %v]",uv.R.Round,seq))
 			return append(actions, verifyVoteAction(e, uv.R.Round, uv.R.Period, seq))
 		}
 		v := e.Input.Vote
@@ -507,14 +515,19 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 				Proposal: ep.Payload.u(),
 				Vote:     v.u(),
 			}
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) proposalVote- 5"))
 			a = broadcastAction(protocol.ProposalPayloadTag, transmit)
 		}
+		logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END PROPOSALVOTE"))
 		return append(actions, a)
 	}
 
 	switch e.t() {
 	case payloadPresent, payloadVerified:
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) BEGIN PAYLOADPRESENT or VERIFIED"))
+        
 		ef := r.dispatch(*p, delegatedE, proposalMachine, 0, 0, 0)
+
 		switch ef.t() {
 		case payloadMalformed:
 			err := makeSerErrf("rejected message since it was invalid: %v", ef.(filteredEvent).Err)
@@ -535,7 +548,7 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 		case proposalCommittable:
 			uv = ef.(committableEvent).Vote.u()
 		}
-		up := e.Input.UnauthenticatedProposal
+		up := e.Input.UnauthenticatedProposal // up is a proposal with an originalproposer address
 
 		a := relayAction(e, protocol.ProposalPayloadTag, compoundMessage{Proposal: up, Vote: uv})
 		actions = append(actions, a)
@@ -543,43 +556,57 @@ func (p *player) handleMessageEvent(r routerHandle, e messageEvent) (actions []a
 		if ef.t() == proposalCommittable && p.Step <= cert {
 			actions = append(actions, p.issueCertVote(r, ef.(committableEvent)))
 		}
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END PAYLOADPRESENT or VERIFIED"))
+		
 		return actions
 
 	case votePresent, voteVerified:
+        
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) BEGIN VOTEPRESENT or VERIFIED"))
 		ef := r.dispatch(*p, delegatedE, voteMachine, 0, 0, 0)
+        
 		switch ef.t() {
 		case voteMalformed:
 			// TODO Add Metrics here to capture telemetryspec.VoteRejectedEvent details
 			// 	Reason:           fmt.Sprintf("rejected malformed message: %v", e.Err),
 			err := makeSerErrf("rejected message since it was invalid: %v", ef.(filteredEvent).Err)
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteMalformed"))
 			return append(actions, disconnectAction(e, err))
 		case voteFiltered:
 			err := ef.(filteredEvent).Err
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - voteFiltered"))
 			return append(actions, ignoreAction(e, err))
 		}
 		if e.t() == votePresent {
 			uv := e.Input.UnauthenticatedVote
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) votePresent - votePresent"))
 			return append(actions, verifyVoteAction(e, uv.R.Round, uv.R.Period, 0))
 		} // else e.t() == voteVerified
 		v := e.Input.Vote
 		actions = append(actions, relayAction(e, protocol.AgreementVoteTag, v.u()))
 		a1 := p.handle(r, ef)
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END VOTEPRESENT or VERIFIED"))       
 		return append(actions, a1...)
 
 	case bundlePresent, bundleVerified:
 		ef := r.dispatch(*p, delegatedE, voteMachine, 0, 0, 0)
+        //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent of Verified"))
 		switch ef.t() {
 		case bundleMalformed:
 			err := makeSerErrf("rejected message since it was invalid: %v", ef.(filteredEvent).Err)
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err malformed"))
 			return append(actions, disconnectAction(e, err))
 		case bundleFiltered:
 			err := ef.(filteredEvent).Err
+			//logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent err filtered"))
 			return append(actions, ignoreAction(e, err))
 		}
 		if e.t() == bundlePresent {
+            //logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) bundlePresent - bundlePresent"))
 			ub := e.Input.UnauthenticatedBundle
 			return append(actions, verifyBundleAction(e, ub.Round, ub.Period))
 		}
+		logging.Base().Info(fmt.Errorf("ZZZZINFO(player.go/handleMessageEvent) END bundlePresent or Verified"))
 		a0 := relayAction(e, protocol.VoteBundleTag, ef.(thresholdEvent).Bundle)
 		a1 := p.handle(r, ef)
 		return append(append(actions, a0), a1...)

@@ -19,6 +19,7 @@ package agreement
 import (
 	"context"
 	"sync"
+    "fmt"
 
 	"github.com/algorand/go-algorand/logging"
 	"github.com/algorand/go-algorand/protocol"
@@ -267,8 +268,11 @@ func (c *poolCryptoVerifier) Verify(ctx context.Context, request cryptoRequest) 
 }
 
 func (c *poolCryptoVerifier) VerifyVote(ctx context.Context, request cryptoVoteRequest) {
-	c.proposalContexts.clearStaleContexts(request.Round, request.Period, request.Pinned)
+	//c.proposalContexts.clearStaleContexts(request.Round, request.Period, request.Pinned)
 	request.ctx = c.proposalContexts.addVote(request)
+    
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(cryptoVerifier.go/VerifyVote)"))
+    
 	switch request.Tag {
 	case protocol.AgreementVoteTag:
 		select {
@@ -335,7 +339,9 @@ func (c *poolCryptoVerifier) proposalVerifyWorker() {
 func (c *poolCryptoVerifier) verifyProposalPayload(request cryptoRequest) cryptoResult {
 	m := request.message
 	up := request.UnauthenticatedProposal
-
+	
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(cryptoVerifier.go/verifyProposalPayload) call impls.Validator")) 
+	
 	p, err := up.validate(request.ctx, request.Round, c.ledger, c.validator)
 	select {
 	case <-request.ctx.Done():
@@ -350,5 +356,7 @@ func (c *poolCryptoVerifier) verifyProposalPayload(request cryptoRequest) crypto
 	}
 
 	m.Proposal = p
+	
+	logging.Base().Info(fmt.Errorf("ZZZZINFO(cryptoVerifier.go/verifyProposalPayload) RETURN"))
 	return cryptoResult{message: m, TaskIndex: request.TaskIndex}
 }
