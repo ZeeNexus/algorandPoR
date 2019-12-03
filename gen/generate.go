@@ -175,7 +175,7 @@ func generateGenesisFiles(outDir string, proto protocol.ConsensusVersion, netNam
 		var data basics.AccountData
 		data.Status = wallet.Online
 		data.MicroAlgos.Raw = wallet.Stake
-		data.Reputation.Raw = 1
+		data.Reputation.Raw = config.RepDefaultInitVal
 		if wallet.Online == basics.Online {
 			data.VoteID = part.VotingSecrets().OneTimeSignatureVerifier
 			data.SelectionID = part.VRFSecrets().PK
