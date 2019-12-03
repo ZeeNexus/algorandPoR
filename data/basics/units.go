@@ -30,6 +30,18 @@ type Reputation struct {
 	Raw uint64
 }
 
+// Whether or not the committee member is blacklisted for the round (blacklist feature)
+type Blacklisted struct {
+	Raw Round
+}
+
+// Stores meta data to detect bias
+type MetaData struct {
+	BlacklistedCount uint64
+	ReviewCountPer500Rounds uint64
+	// Add more when needed
+}
+
 // MicroAlgos is our unit of currency.  It is wrapped in a struct to nudge
 // developers to use an overflow-checking library for any arithmetic.
 type MicroAlgos struct {

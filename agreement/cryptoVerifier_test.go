@@ -43,7 +43,7 @@ func findSenders(l Ledger, Round basics.Round, Period period, Step step, address
 	for i, sender := range addresses {
 		m, _ := membership(l, sender, Round, Period, Step)
 		cred := committee.MakeCredential(&selections[i].SK, m.Selector)
-		if _, err := cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m); err == nil {
+		if _, err := cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m, Round); err == nil {
 			senders = append(senders, i)
 		}
 	}

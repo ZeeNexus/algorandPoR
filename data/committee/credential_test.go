@@ -51,7 +51,7 @@ func TestAccountSelected(t *testing.T) {
 				TotalMoney: totalMoney,
 			}
 			u := MakeCredential(vrfSecrets[i], sel)
-			credential, _ := u.Verify(proto, m)
+			credential, _ := u.Verify(proto, m, sel.Round)
 			leaders += credential.Weight
 		}
 
@@ -75,7 +75,7 @@ func TestAccountSelected(t *testing.T) {
 				TotalMoney: totalMoney,
 			}
 			u := MakeCredential(vrfSecrets[i], sel)
-			credential, _ := u.Verify(proto, m)
+			credential, _ := u.Verify(proto, m, sel.Round)
 			committee += credential.Weight
 		}
 
@@ -109,7 +109,7 @@ func TestRichAccountSelected(t *testing.T) {
 	}
 
 	lu := MakeCredential(vrfSecrets[0], sel)
-	lcred, _ := lu.Verify(proto, m)
+	lcred, _ := lu.Verify(proto, m, sel.Round)
 
 	if lcred.Weight == 0 {
 		t.Errorf("bad number of leaders %v expected %v", lcred.Weight, proto.NumProposers)
@@ -129,7 +129,7 @@ func TestRichAccountSelected(t *testing.T) {
 	}
 
 	cu := MakeCredential(vrfSecrets[0], sel)
-	ccred, _ := cu.Verify(proto, m)
+	ccred, _ := cu.Verify(proto, m, sel.Round)
 
 	if (ccred.Weight < uint64(0.4*float64(step.CommitteeSize(proto)))) || (ccred.Weight > uint64(.6*float64(step.CommitteeSize(proto)))) {
 		t.Errorf("bad number of committee members %v expected %v", ccred.Weight, step.CommitteeSize(proto))
@@ -164,7 +164,7 @@ func TestPoorAccountSelectedLeaders(t *testing.T) {
 			}
 
 			u := MakeCredential(vrfSecrets[j], sel)
-			credential, _ := u.Verify(proto, m)
+			credential, _ := u.Verify(proto, m, sel.Round)
 			leaders[i] += credential.Weight
 
 		}
@@ -207,7 +207,7 @@ func TestPoorAccountSelectedCommittee(t *testing.T) {
 				TotalMoney: basics.MicroAlgos{Raw: 2000},
 			}
 			u := MakeCredential(vrfSecrets[j], sel)
-			credential, _ := u.Verify(proto, m)
+			credential, _ := u.Verify(proto, m, sel.Round)
 			committee += credential.Weight
 		}
 
@@ -243,7 +243,7 @@ func TestNoMoneyAccountNotSelected(t *testing.T) {
 			TotalMoney: basics.MicroAlgos{Raw: 1000},
 		}
 		u := MakeCredential(zeroVRFSecret, sel)
-		_, err := u.Verify(proto, m)
+		_, err := u.Verify(proto, m, sel.Round)
 		require.Error(t, err, "account should not have been selected")
 	}
 }
@@ -274,7 +274,7 @@ func TestLeadersSelected(t *testing.T) {
 		Selector:   sel,
 		TotalMoney: totalMoney,
 	}
-	_, err := MakeCredential(vrfSecrets[0], sel).Verify(proto, m)
+	_, err := MakeCredential(vrfSecrets[0], sel).Verify(proto, m, sel.Round)
 	require.NoError(t, err, "leader should have been selected")
 }
 
@@ -304,7 +304,7 @@ func TestCommitteeSelected(t *testing.T) {
 		Selector:   sel,
 		TotalMoney: totalMoney,
 	}
-	_, err := MakeCredential(vrfSecrets[0], sel).Verify(proto, m)
+	_, err := MakeCredential(vrfSecrets[0], sel).Verify(proto, m, sel.Round)
 	require.NoError(t, err, "committee should have been selected")
 }
 
@@ -330,7 +330,7 @@ func TestAccountNotSelected(t *testing.T) {
 			Selector:   sel,
 			TotalMoney: totalMoney,
 		}
-		credential, _ := MakeCredential(vrfSecrets[i], sel).Verify(proto, m)
+		credential, _ := MakeCredential(vrfSecrets[i], sel).Verify(proto, m, sel.Round)
 		require.False(t, credential.Selected())
 		leaders += credential.Weight
 	}
@@ -373,6 +373,6 @@ func BenchmarkSortition(b *testing.B) {
 			Selector:   sel,
 			TotalMoney: basics.MicroAlgos{Raw: uint64(totalMoney)},
 		}
-		credentials[i], _ = MakeCredential(vrfSecrets[0], sel).Verify(proto, m)
+		credentials[i], _ = MakeCredential(vrfSecrets[0], sel).Verify(proto, m, sel.Round)
 	}
 }

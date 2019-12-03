@@ -72,9 +72,15 @@ type (
 //
 // If it is, the returned Credential constitutes a proof of this fact.
 // Otherwise, an error is returned.
-func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Membership) (res Credential, err error) {
+func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Membership, current basics.Round) (res Credential, err error) {
 	selectionKey := m.Record.SelectionID
 	ok, vrfOut := selectionKey.Verify(cred.Proof, m.Selector)
+    
+    // Checks if the member is blacklisted or not (blacklist feature)
+	if(current <= m.Record.Blacklisted.Raw){
+		logging.Base().Infof("AugAugAug Blacklisted! Round = %v, Blacklist Value = %v", current, m.Record.Blacklisted.Raw)
+  		return
+	}
 
 	hashable := hashableCredential{
 		RawOut: vrfOut,

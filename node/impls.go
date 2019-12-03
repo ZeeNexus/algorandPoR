@@ -186,6 +186,8 @@ func (l agreementLedger) EnsureDigest(cert agreement.Certificate, quit chan stru
 		}
 		// Otherwise, fetcher gave us the wrong block
 		logging.Base().Warnf("fetcher gave us bad/wrong block (for round %d): fetched hash %v; want hash %v", round, block.Hash(), blockHash)
+        
+        // logging.Base().Infof("blahblahblah") // (blacklist feature)
 
 		// As a failsafe, if the cert we fetched is valid but for the wrong block, panic as loudly as possible
 		if cert.Round == fetchedCert.Round &&

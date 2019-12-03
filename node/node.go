@@ -115,6 +115,7 @@ type AlgorandFullNode struct {
 	wsFetcherService *rpcs.WsFetcherService // to handle inbound gossip msgs for fetching over gossip
 
 	oldKeyDeletionNotify chan struct{}
+	blacklist [5000]basics.Address // blacklist of people to keep out of the committee. 5000 is just a sample number.
 }
 
 // TxnWithStatus represents information about a single transaction,

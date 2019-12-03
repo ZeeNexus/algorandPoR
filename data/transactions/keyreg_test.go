@@ -38,6 +38,10 @@ func (balances keyregTestBalances) UpdateReputation(addr basics.Address, update 
 	return nil
 }
 
+func (balances keyregTestBalances) UpdateBlacklisted(addr basics.Address, update basics.Round) error {
+	return nil
+}
+
 func (balances keyregTestBalances) Get(addr basics.Address) (basics.BalanceRecord, error) {
 	return balances.addrs[addr], nil
 }

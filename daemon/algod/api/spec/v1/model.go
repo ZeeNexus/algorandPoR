@@ -118,6 +118,14 @@ type Account struct {
 	// required: true
 	Reputation uint64 `json:"reputation"`
 
+	// Blacklisted indicates whether or not the account is blacklisted for the round (blacklist feature)
+	//
+	// required: true
+	// 0 indicates false (good guy)
+	// 1 indicates true (bad guy)
+	Blacklisted uint64 `json:"blacklisted"`
+	
+	
 	// Amount indicates the total number of MicroAlgos in the account
 	//
 	// required: true

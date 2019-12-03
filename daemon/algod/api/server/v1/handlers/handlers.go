@@ -410,6 +410,7 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 	}
 
 	reputation := record.Reputation
+	blacklisted := record.Blacklisted // (blacklist feature)
 
 	amount := record.MicroAlgos
 	amountWithoutPendingRewards := recordWithoutPendingRewards.MicroAlgos
@@ -432,6 +433,7 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 		Address:                     addr.String(),
 		Amount:                      amount.Raw,
 		Reputation:                  reputation.Raw,
+        Blacklisted: 		     	 uint64(blacklisted.Raw), // (blacklist feature)
 		PendingRewards:              pendingRewards.Raw,
 		AmountWithoutPendingRewards: amountWithoutPendingRewards.Raw,
 		Rewards:                     record.RewardedMicroAlgos.Raw,
