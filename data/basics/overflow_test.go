@@ -23,4 +23,10 @@ func TestAddUaS(t *testing.T) {
 	require.Equal(t, newval, uint64(1))
 	require.Equal(t, of, false)
 
+	var tmp uint64 = 0
+	var tmp2 uint64 = tmp - 1
+	newval, of = ot.AddUaS(tmp2, 2)
+	require.Equal(t, newval,tmp2) 
+	require.Equal(t, of, true)
+
 }

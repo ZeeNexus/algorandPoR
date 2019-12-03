@@ -69,6 +69,7 @@ func init() {
 	accountCmd.AddCommand(renameCmd)
 	accountCmd.AddCommand(reputationCmd)
 	accountCmd.AddCommand(balanceCmd)
+    accountCmd.AddCommand(blacklistedCmd) // (blacklist feature)
 	accountCmd.AddCommand(rewardsCmd)
 	accountCmd.AddCommand(changeOnlineCmd)
 	accountCmd.AddCommand(addParticipationKeyCmd)
@@ -123,6 +124,10 @@ func init() {
 	balanceCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Account address to retrieve balance (required)")
 	balanceCmd.MarkFlagRequired("address")
 
+	// Blacklisted flags (blacklist feature)
+	blacklistedCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Account address to retrieve blacklisted (required)")
+	blacklistedCmd.MarkFlagRequired("address")    
+    
 	// Rewards flags
 	rewardsCmd.Flags().StringVarP(&accountAddress, "address", "a", "", "Account address to retrieve rewards (required)")
 	rewardsCmd.MarkFlagRequired("address")
@@ -463,6 +468,21 @@ var reputationCmd = &cobra.Command{
 	},
 }
 
+var blacklistedCmd = &cobra.Command{  // (blacklist feature)
+	Use:   "blacklisted",
+	Short: "Retrieve the blacklisted for the specified account",
+	Long:  `Retrieve the blacklisted for the specified account`,
+	Args:  validateNoPosArgsFn,
+	Run: func(cmd *cobra.Command, args []string) {
+		dataDir := ensureSingleDataDir()
+		client := ensureAlgodClient(dataDir)
+		response, err := client.AccountInformation(accountAddress)
+		if err != nil {
+			reportErrorf(errorRequestFail, err)
+		}
+		fmt.Printf("%v microBlack\n", response.Blacklisted)
+	},
+}
 
 
 var balanceCmd = &cobra.Command{

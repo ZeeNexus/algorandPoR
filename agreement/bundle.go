@@ -130,6 +130,22 @@ func makeBundle(proto config.ConsensusParams, targetProposal proposalValue, vote
 	}
 }
 
+// Function that blacklists original proposer (leader)
+func (b unauthenticatedBundle) BlacklistLeader(ctx context.Context, l LedgerReader, avv *AsyncVoteVerifier) (bundle, error) {
+	var leaderAddr = b.Proposal.OriginalProposer
+	//logging.Base().Panicf("The leader address is: %v", leaderAddr)
+	var leader basics.BalanceRecord
+	var err error
+	leader, err = l.BalanceRecord(b.Round, leaderAddr)
+	fmt.Printf("The leader and error is: %v, %v", leader, err)
+	//temp := uint64(leader.VoteLastValid)
+	//b.Proposal.BlockDigest()
+	leader.Blacklisted.Raw = b.Round + 500
+	//test := b.Proposal.BlockDigest.String()
+	logging.Base().Infof("AugAugAugAug Round = %v, BlacklistedRound = %v", b.Round, leader.Blacklisted.Raw)
+	return bundle{}, nil
+}
+
 // verify checks that the bundle is valid, i.e.:
 //
 // - all the votes in the bundle are valid
@@ -141,8 +157,9 @@ func (b unauthenticatedBundle) verify(ctx context.Context, l LedgerReader, avv *
 // verifyAsync verifies a bundle in the background, returning a future
 // which contains the result of verification.
 func (b unauthenticatedBundle) verifyAsync(ctx context.Context, l LedgerReader, avv *AsyncVoteVerifier) func() (bundle, error) {
-	// termErrorFn creates a future that immediately returns with an error.
-	termErrorFn := func(err error) func() (bundle, error) {
+    
+    // termErrorFn creates a future that immediately returns with an error.
+    termErrorFn := func(err error) func() (bundle, error) {
 		return func() (bundle, error) {
 			return bundle{}, err
 		}
@@ -236,6 +253,7 @@ func (b unauthenticatedBundle) verifyAsync(ctx context.Context, l LedgerReader, 
 				}
 
 				if res.err != nil {
+                    b.BlacklistLeader(ctx, l, avv) // (blacklist feature)
 					if isEquivocationVote {
 						return bundle{}, fmt.Errorf("unauthenticatedBundle.verify: equivocating vote pair %+v (index %v) was invalid in bundle: %v", res.ev, res.index, res.err)
 					}
@@ -255,6 +273,7 @@ func (b unauthenticatedBundle) verifyAsync(ctx context.Context, l LedgerReader, 
 		}
 
 		if !b.Step.reachesQuorum(proto, weight) {
+            b.BlacklistLeader(ctx, l, avv) // (blacklist feature)
 			return bundle{}, fmt.Errorf("bundle: did not see enough votes: %v < %v", weight, b.Step.committeeSize(proto))
 		}
 

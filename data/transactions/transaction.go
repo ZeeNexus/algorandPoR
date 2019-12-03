@@ -53,9 +53,10 @@ type SpecialAddresses struct {
 type Balances interface {
 
 
-	//XDDLG: TODO is this the right place?
+	//XDDLG: correct place
 	UpdateReputation(addr basics.Address, update int64 ) error
 
+    UpdateBlacklisted(addr basics.Address, update basics.Round ) error
 
 	// Get looks up the balance record for an address
 	// If the account is known to be empty, then err should be nil and the returned balance record should have the given address and empty AccountData

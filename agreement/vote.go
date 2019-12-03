@@ -130,7 +130,7 @@ func (uv unauthenticatedVote) verify(l LedgerReader) (vote, error) {
 		return vote{}, fmt.Errorf("unauthenticatedVote.verify: could not verify FS signature on vote by %v given %v: %+v", rv.Sender, voteID, uv)
 	}
 
-	cred, err := uv.Cred.Verify(proto, m)
+	cred, err := uv.Cred.Verify(proto, m, rv.Round)
 	if err != nil {
 		return vote{}, fmt.Errorf("unauthenticatedVote.verify: got a vote, but sender was not selected: %v", err)
 	}

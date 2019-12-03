@@ -124,6 +124,14 @@ type Account struct {
 	// required: true
 	Reputation uint64 `json:"reputation"`
 
+	// Blacklisted indicates whether or not the account is blacklisted for the round (blacklist feature)
+	//
+	// required: true
+	// 0 indicates false (good guy)
+	// 1 indicates true (bad guy)
+	Blacklisted uint64 `json:"blacklisted"`
+	
+	
 	// Amount indicates the total number of MicroAlgos in the account
 	//
 	// required: true
@@ -206,12 +214,12 @@ type Transaction struct {
 	//
 	// required: false
 	// swagger:strfmt byte
-	ReviewNote []byte `json:"reviewnoteb64"`	
-	
-    ReviewRate  uint64 `json:"reviewrate,omitempty"`	
-	
+	ReviewNote []byte `json:"reviewnoteb64"`
+
+  ReviewRate  uint64 `json:"reviewrate,omitempty"`
+
 	ReviewEval  uint64 `json:"revieweval,omitempty"`
-	
+
 	RepAdjust   int64 `json:"repadjust,omitempty"`
 	
 	TimeIn      string `json:"timein,omitempty"`
@@ -512,6 +520,12 @@ type Supply struct {
 	//
 	// required: true
 	TotalMoney uint64 `json:"totalMoney"`
+
+
+	//Reputation, for now trying to mimic stake in the lifecycle for review
+	TotalReputation uint64 `json:"totalReputation"`
+	OnlineReputation uint64 `json:"onlineReputation"`
+
 
 	// OnlineMoney
 	//

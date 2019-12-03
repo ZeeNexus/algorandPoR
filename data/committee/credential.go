@@ -72,9 +72,15 @@ type (
 //
 // If it is, the returned Credential constitutes a proof of this fact.
 // Otherwise, an error is returned.
-func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Membership) (res Credential, err error) {
+func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Membership, current basics.Round) (res Credential, err error) {
 	selectionKey := m.Record.SelectionID
 	ok, vrfOut := selectionKey.Verify(cred.Proof, m.Selector)
+    
+    // Checks if the member is blacklisted or not (blacklist feature)
+	if(current <= m.Record.Blacklisted.Raw){
+		logging.Base().Infof("AugAugAug Blacklisted! Round = %v, Blacklist Value = %v", current, m.Record.Blacklisted.Raw)
+  		return
+	}
 
 	hashable := hashableCredential{
 		RawOut: vrfOut,
@@ -95,9 +101,19 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 	}
 
 	var weight uint64
-	userMoney := m.Record.VotingStake()
+
 	expectedSelection := float64(m.Selector.CommitteeSize(proto))
 
+	userRep := m.Record.RepVotingStake()
+	if m.TotalReputation.Raw < userRep.Raw {
+			logging.Base().Panicf("UnauthenticatedCredential.Verify: total rep = %v, but user rep = %v", m.TotalReputation, userRep)
+	} else {
+		weight = sortition.SelectRepBased(userRep.Raw, m.TotalReputation.Raw, expectedSelection, h)
+		//logging.Base().Infof("PoR %v %v %v %v", userRep.Raw, m.TotalReputation.Raw, expectedSelection, weight)
+	}
+
+	/*
+	//userMoney := m.Record.VotingStake()
 	if m.TotalMoney.Raw < userMoney.Raw {
 		logging.Base().Panicf("UnauthenticatedCredential.Verify: total money = %v, but user money = %v", m.TotalMoney, userMoney)
 	} else if m.TotalMoney.IsZero() || expectedSelection == 0 || expectedSelection > float64(m.TotalMoney.Raw) {
@@ -105,8 +121,9 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 	} else if userMoney.IsZero() {
 		// weight = 0
 	} else {
-		weight = sortition.Select(userMoney.Raw, m.TotalMoney.Raw, expectedSelection, h)
+		//weight = sortition.Select(userMoney.Raw, m.TotalMoney.Raw, expectedSelection, h)
 	}
+	*/
 
 	if weight == 0 {
 		err = fmt.Errorf("UnauthenticatedCredential.Verify: credential has weight 0")

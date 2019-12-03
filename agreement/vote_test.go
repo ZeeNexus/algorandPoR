@@ -61,7 +61,7 @@ func TestVoteValidation(t *testing.T) {
 		require.NoError(t, err)
 
 		//loop to find votes selected to participate
-		_, err = unauthenticatedVote.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m)
+		_, err = unauthenticatedVote.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m, round)
 		selected := err == nil
 		if selected {
 			processedVote = true
@@ -134,7 +134,7 @@ func TestVoteReproposalValidation(t *testing.T) {
 		require.NoError(t, err)
 
 		//loop to find votes selected to participate
-		_, err = unauthenticatedVote.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m)
+		_, err = unauthenticatedVote.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m, round)
 		selected := err == nil
 		if selected {
 			processedVote = true
@@ -306,11 +306,11 @@ func TestEquivocationVoteValidation(t *testing.T) {
 			// test vote accessors
 			v0 := aev.v0()
 			require.NotNil(t, v0)
-			_, err = v0.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m)
+			_, err = v0.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m, round)
 
 			v1 := aev.v1()
 			require.NotNil(t, v1)
-			_, err = v1.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m)
+			_, err = v1.Cred.Verify(config.Consensus[protocol.ConsensusCurrentVersion], m, round)
 
 			noSig := ev
 			noSig.Sigs = [2]crypto.OneTimeSignature{crypto.OneTimeSignature{}, crypto.OneTimeSignature{}}

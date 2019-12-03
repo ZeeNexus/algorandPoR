@@ -80,6 +80,10 @@ func (balances mockBalances) UpdateReputation(addr basics.Address, update int64)
 	return nil
 }
 
+func (balances mockBalances) UpdateBlacklisted(addr basics.Address, update basics.Round) error {
+	return nil
+}
+
 func (balances mockBalances) Get(basics.Address) (basics.BalanceRecord, error) {
 	return basics.BalanceRecord{}, nil
 }

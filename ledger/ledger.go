@@ -67,6 +67,8 @@ type Ledger struct {
 	trackerMu deadlock.RWMutex
 
 	headerCache heapLRUCache
+    // Stores block for proposer stuff (blacklist feature)
+	proposerBlock agreement.Certificate
 }
 
 // OpenLedger creates a Ledger object, using SQLite database filenames
@@ -352,7 +354,8 @@ func (l *Ledger) AddValidatedBlock(vb ValidatedBlock, cert agreement.Certificate
 	if err != nil {
 		return err
 	}
-
+    l.proposerBlock = cert // (blacklist feature)
+	
 	l.trackers.newBlock(vb.blk, vb.delta)
 	return nil
 }

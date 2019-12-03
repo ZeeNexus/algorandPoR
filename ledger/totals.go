@@ -30,6 +30,8 @@ type AlgoCount struct {
 
 	// Total number of whole reward units in accounts.
 	RewardUnits uint64
+
+	Reputation basics.Reputation
 }
 
 func (ac *AlgoCount) applyRewards(rewardsPerUnit uint64, ot *basics.OverflowTracker) {
@@ -69,6 +71,7 @@ func (at *AccountTotals) addAccount(proto config.ConsensusParams, data basics.Ac
 	algos, _ := data.Money(proto, at.RewardsLevel)
 	sum.Money = ot.AddA(sum.Money, algos)
 	sum.RewardUnits = ot.Add(sum.RewardUnits, data.MicroAlgos.RewardUnits(proto))
+	sum.Reputation = ot.AddRep(sum.Reputation, data.Reputation)
 }
 
 func (at *AccountTotals) delAccount(proto config.ConsensusParams, data basics.AccountData, ot *basics.OverflowTracker) {
@@ -76,6 +79,7 @@ func (at *AccountTotals) delAccount(proto config.ConsensusParams, data basics.Ac
 	algos, _ := data.Money(proto, at.RewardsLevel)
 	sum.Money = ot.SubA(sum.Money, algos)
 	sum.RewardUnits = ot.Sub(sum.RewardUnits, data.MicroAlgos.RewardUnits(proto))
+	sum.Reputation = ot.SubRep(sum.Reputation, data.Reputation)
 }
 
 func (at *AccountTotals) applyRewards(rewardsLevel uint64, ot *basics.OverflowTracker) {
@@ -105,6 +109,16 @@ func (at *AccountTotals) Participating() basics.MicroAlgos {
 	}
 	return res
 }
+
+
+func (at *AccountTotals) ParticipatingRep() basics.Reputation {
+	res, overflowed := basics.OAddRep(at.Online.Reputation, at.Offline.Reputation)
+	if overflowed {
+		logging.Base().Panicf("AccountTotals.ParticipatingRep(): overflow %v + %v", at.Online, at.Offline)
+	}
+	return res
+}
+
 
 // RewardUnits returns the sum of reward units held under ``participating''
 // account status values (Online and Offline).  It excludes units held

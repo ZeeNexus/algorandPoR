@@ -21,17 +21,17 @@ import (
 	"context"
 	"errors"    
 	"fmt"
-    "bytes"
-    "time"
-    "math"
+  "bytes"
+  "time"
+  "math"
 	"io/ioutil"
-    "os"
+  "os"
 	"os/exec"
-    "strconv"
-    "math/rand"
-   // "path/filepath"
-   // "strings"
-    
+  "strconv"
+  "math/rand"
+  "strings"
+
+
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/crypto"
 	"github.com/algorand/go-algorand/data/basics"
@@ -81,6 +81,17 @@ func (cs *roundCowState) UpdateReputation(addr basics.Address, update int64) err
 		return err
 	}
 	newdata := olddata.WithUpdatedReputation(cs.proto, update)
+	cs.put(addr, olddata, newdata)
+	return nil
+}
+
+func (cs *roundCowState) UpdateBlacklisted(addr basics.Address, update basics.Round) error {
+	olddata, err := cs.lookup(addr)
+	if err != nil {
+		return err
+	}
+	//logging.Base().Infof("AugAugAug Blacklist old = %v, Blacklist new = %v", cs.proto, update)
+	newdata := olddata.WithUpdatedBlacklisted(cs.proto, update)
 	cs.put(addr, olddata, newdata)
 	return nil
 }
@@ -751,6 +762,24 @@ func (eval *BlockEvaluator) GenerateBlock() (*ValidatedBlock, error) {
 	return &vb, nil
 }
 
+// Function that blacklists original proposer (leader) (blacklist feature)
+func (eval* BlockEvaluator) BlacklistLeader(proposer basics.Address, note string) error {
+    var err error
+    var leader basics.BalanceRecord
+    cow := eval.state.child()
+    cow.UpdateBlacklisted(proposer, eval.block.Round())
+    leader, err = cow.Get(proposer)
+
+    if err != nil{
+        return err
+    }
+
+    logging.Base().Infof("AugAugAug ProposerAddr = %v, Blacklist = %v, round = %v, note = %v ", proposer, leader.Blacklisted.Raw, eval.block.Round(), note)
+
+    return nil
+}
+
+
 func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, validate bool, txcache VerifiedTxnCache, executionPool execpool.BacklogPool) (stateDelta, evalAux, error) {
 	eval, err := startEvaluator(l, blk.BlockHeader, aux, validate, false, txcache, executionPool)
     
@@ -776,10 +805,24 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 			return stateDelta{}, evalAux{}, ctx.Err()
 		default:
 		}
+		
+		// Blacklists on error or blacklist note
+        proposer := l.proposerBlock.Proposal.OriginalProposer
+        //         logging.Base().Infof("AugAugAug Hi there %v", proposer.String())
+        note := string(txn.Txn.Header.Note)
+        // testing purpose only (blacklist feature)
+        if strings.Contains(note, "blacklist"){
+            eval.BlacklistLeader(proposer, note)
+        }
+
+        // eval.BlacklistLeader(proposer, note)
+        
+        
 
 		err = eval.Transaction(txn.SignedTxn, &txn.ApplyData)
         logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.Transaction"))  
 		if err != nil {
+            // eval.BlacklistLeader(proposer, note) // if tx is not good then blacklist (blacklist feature)
 			return stateDelta{}, evalAux{}, err
 		}
 	}

@@ -16,7 +16,7 @@
 
 package transactions
 
-import (
+import (    
 	"fmt"
 
 	"github.com/algorand/go-algorand/config"

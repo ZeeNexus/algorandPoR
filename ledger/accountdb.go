@@ -46,7 +46,9 @@ var accountsSchema = []string{
 		offlinerewardunits integer,
 		notparticipating integer,
 		notparticipatingrewardunits integer,
-		rewardslevel integer)`,
+		rewardslevel integer,
+		onlinereputation integer,
+		offlinereputation integer)`,
 	`CREATE TABLE IF NOT EXISTS accountbase (
 		address blob primary key,
 		data blob)`,
@@ -178,23 +180,25 @@ func accountsAll(tx *sql.Tx) (bals map[basics.Address]basics.AccountData, err er
 }
 
 func accountsTotals(tx *sql.Tx) (totals AccountTotals, err error) {
-	row := tx.QueryRow("SELECT online, onlinerewardunits, offline, offlinerewardunits, notparticipating, notparticipatingrewardunits, rewardslevel FROM accounttotals")
+	row := tx.QueryRow("SELECT online, onlinerewardunits, offline, offlinerewardunits, notparticipating, notparticipatingrewardunits, rewardslevel, onlinereputation, offlinereputation FROM accounttotals")
 	err = row.Scan(&totals.Online.Money.Raw, &totals.Online.RewardUnits,
 		&totals.Offline.Money.Raw, &totals.Offline.RewardUnits,
 		&totals.NotParticipating.Money.Raw, &totals.NotParticipating.RewardUnits,
-		&totals.RewardsLevel)
+		&totals.RewardsLevel,
+		&totals.Online.Reputation.Raw, &totals.Offline.Reputation.Raw)
 
 	return
 }
 
 func accountsPutTotals(tx *sql.Tx, totals AccountTotals) error {
 	// The "id" field is there so that we can use a convenient REPLACE INTO statement
-	_, err := tx.Exec("REPLACE INTO accounttotals (id, online, onlinerewardunits, offline, offlinerewardunits, notparticipating, notparticipatingrewardunits, rewardslevel) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+	_, err := tx.Exec("REPLACE INTO accounttotals (id, online, onlinerewardunits, offline, offlinerewardunits, notparticipating, notparticipatingrewardunits, rewardslevel, onlinereputation, offlinereputation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		"",
 		totals.Online.Money.Raw, totals.Online.RewardUnits,
 		totals.Offline.Money.Raw, totals.Offline.RewardUnits,
 		totals.NotParticipating.Money.Raw, totals.NotParticipating.RewardUnits,
-		totals.RewardsLevel)
+		totals.RewardsLevel,
+		totals.Online.Reputation.Raw, totals.Offline.Reputation.Raw)
 	return err
 }
 

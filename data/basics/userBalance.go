@@ -56,7 +56,9 @@ type AccountData struct {
 	Status     Status     `codec:"onl"`
 	Reputation Reputation `codec:"reputation"`
 	MicroAlgos MicroAlgos `codec:"algo"`
-
+	Blacklisted Blacklisted `codec:"black"`
+	MataData   MetaData   `codec:"meta"`
+	
 	// RewardsBase is used to implement rewards.
 	// This is not meaningful for accounts with Status=NotParticipating.
 	//
@@ -111,6 +113,7 @@ type AccountDetail struct {
 	Address Address
 	Algos   MicroAlgos
 	Status  Status
+	Blacklisted Blacklisted `codec:"black"`
 }
 
 // SupplyDetail encapsulates meaningful details about the ledger's current token supply
@@ -154,6 +157,17 @@ func (u AccountData) WithUpdatedReputation(proto config.ConsensusParams, update 
 }
 
 
+// (blacklist feature)
+func (u AccountData) WithUpdatedBlacklisted(proto config.ConsensusParams, update Round) AccountData {
+	if u.Status != NotParticipating {
+		var ot OverflowTracker
+		newval := ot.AddR(update, Round(500))
+		u.Blacklisted = Blacklisted{Raw: newval}
+	}
+	return u
+}
+
+
 // WithUpdatedRewards returns an updated number of algos in an AccountData
 // to reflect rewards up to some rewards level.
 func (u AccountData) WithUpdatedRewards(proto config.ConsensusParams, rewardsLevel uint64) AccountData {
@@ -185,6 +199,18 @@ func (u AccountData) VotingStake() MicroAlgos {
 
 	return u.MicroAlgos
 }
+
+
+func (u AccountData) RepVotingStake() Reputation {
+	if u.Status != Online {
+		return Reputation{Raw: 0}
+	}
+
+	return u.Reputation
+}
+
+
+
 
 // KeyDilution returns the key dilution for this account,
 // returning the default key dilution if not explicitly specified.
