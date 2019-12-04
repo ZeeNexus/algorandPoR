@@ -173,6 +173,7 @@ func (t *OverflowTracker) ScalarMulA(a MicroAlgos, b uint64) MicroAlgos {
 }
 
 func (t *OverflowTracker) AddUaS(unsigned uint64, signed int64) (res uint64, overflowed bool) {
+    minres := uint64(100000)
 	res = 0
 	overflowed = false
 	signedAsUnsigned := uintAbs(signed)
@@ -182,10 +183,10 @@ func (t *OverflowTracker) AddUaS(unsigned uint64, signed int64) (res uint64, ove
 			res = unsigned
 		}
 	} else {
-		if(unsigned > signedAsUnsigned) {
+		if(unsigned >= (signedAsUnsigned+minres)) { // 100001 >= 100002, when signed is -2
 			res, overflowed = OSub(unsigned, signedAsUnsigned)
 		} else {
-			res = 0
+			res = minres // 0 or 100000
 			overflowed = true
 		}
 	}
