@@ -63,11 +63,15 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 	seedRound := seedRound(r, cparams)
 
 	record, err := l.BalanceRecord(balanceRound, addr)
+	var minimum uint64 = 0
 	if err != nil {
 		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain balance record for address %v in round %v: %v", r, addr, balanceRound, err)
 		return
 	}
-
+    if(record.VotingStake().ToUint64() < minimum) {
+        err = fmt.Errorf("Too little stake %v too partake in consensus", record.VotingStake().Raw)
+        return
+    }
 	total, err := l.Circulation(balanceRound)
 	if err != nil {
 		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain total circulation in round %v: %v", r, balanceRound, err)
