@@ -173,6 +173,7 @@ func (c *CryptoRandomSource) Uint64() uint64 {
 // any round does not conclude by the deadline.
 //
 // The KeyManager must have enough keys to form a cert-quorum.
+//simulates each round - make it so blockfactory and validator are changed here?
 func Simulate(dbname string, n basics.Round, roundDeadline time.Duration, ledger agreement.Ledger, keyManager agreement.KeyManager, proposalFactory agreement.BlockFactory, proposalValidator agreement.BlockValidator, log logging.Logger) error {
 	startRound := ledger.NextRound()
 	stopRound := startRound + n
