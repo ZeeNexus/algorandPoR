@@ -2,7 +2,7 @@
 algorand-por
 
 ====================
-Algorand PoR's official implementation in Go.
+Algorand PoR's official implementation in GO.
 
 Algorand is a permissionless, pure proof-of-stake blockchain that delivers decentralization, scalability, security, and transaction finality.
 
