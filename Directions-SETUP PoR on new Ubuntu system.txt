@@ -1,0 +1,158 @@
+
+===========================================
+
+SETTING UP PROOF OF REVIEW - the Core
+
+===========================================
+
+
+
+(1) Install GIT (git >=1.8.2) and GIT LFS (for large files, currently JAR files)
+
+sudo apt-get install git
+sudo apt-get install git-lfs
+
+___________________________
+(2) Clone / DL the AlgorandPoR repo (put in ~/dev off your home directory if you want)
+
+git clone https://github.com/ZeeNexus/algorandPoR.git
+
+The above will create a new directory AlgorandPoR in your ~/dev directory
+___________________________
+(3) Change to AlgorandPoR directory and pull the LFS files
+
+cd ~/dev/AlgorandPoR/
+git lfs pull
+___________________________
+(4a) Download and install latest GO programming language
+
+https://golang.org/ --or--
+sudo apt-get install golang
+
+___________________________
+(4b) Configure GO environment
+
+create go folder off home
+mkdir ~/go
+
+$ cat >> ~/.bashrc << 'EOF'
+export GOPATH=$HOME/go
+export PATH=/usr/lib/go/bin:$PATH:$GOPATH/bin:$HOME/go/bin
+EOF
+
+* Check if new commands have been added to end of bashrc file
+
+cat ~/.bashrc
+
+source ~/.bashrc
+
+* Verify that GOPATH is set correctly
+
+echo $GOPATH 
+
+___________________________
+(5a Download and install Python-2. Check if you already have python-2
+
+python -V
+
+if response is Python 2.x.x then skip to step 6.
+if no python is installed, install 2.x.x then skip to step 6
+
+sudo apt install python2
+___________________________
+(5b) Switch from Python 3 to 2 as default
+
+* Check which versions are available:
+
+ls /usr/bin/python*
+/usr/bin/python2  /usr/bin/python2.7  /usr/bin/python3  /usr/bin/python3.7
+
+* Check if python alternatives already exist:
+
+sudo update-alternatives --list python
+update-alternatives: error: no alternatives for python
+
+* If not, set up 2 Python alternatives in the system:
+
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+
+* List again to see alternatives show up:
+
+sudo update-alternatives --list python
+
+* Change to python alternative for Python 2 (in menu display, type number and enter):
+
+sudo update-alternatives --config python
+
+* Check your version of Python again
+
+
+___________________________
+(6) Set up initial environment variables:
+
+cd algorandPoR
+./scripts/configure_dev.sh
+
+(7) Build AlgorandPoR (sudo apt-get install make -- if make isn't installed)
+
+make install
+
+* If ERROR with swagger install (part of the build process) that it can't find hcl/hcl/printer then
+  you will need to install swagger@latest manually, then run "make install" afterwards
+
+  (in the ~/go/ directory) 
+GO111MODULE="on" go get github.com/go-swagger/go-swagger@latest
+
+
+
+
+
+
+===========================================
+
+SETTING UP SDK - AlgorandPoR-GO (golang sdk)
+
+===========================================
+
+inside the ~/go/ directory, type: 
+
+go get -u github.com/ZeeNexus/go-algorandpor-sdk/
+go generate github.com/ZeeNexus/go-algorandpor-sdk/
+
+go-algorandpor-sdk should be located in ~/go/src/github.com/ZeeNexus/
+
+*** ALTERNATIVE [best method] ****
+
+clone sdk into /go/src/github.com/ZeeNexus/
+
+git clone https://github.com/ZeeNexus/go-algorandpor-sdk.git
+
+If you have git cloned to the src/github.com/ZeeNexus dir, go to the /logic/ dir
+
+/go-algorandpor-sdk/logic/ go generate
+
+This fixes the "langSpecJson undefined" error when running a dApp
+
+
+
+
+
+
+
+===========================================
+
+SETTING UP Chat dApp PoC - AlgorandPoR-GO (golang)
+
+===========================================
+
+* Inside the ~/go directory
+
+GIT_TERMINAL_PROMPT=1 go get github.com/ZeeNexus/algochatPoR
+
+
+
+
+
+
+
