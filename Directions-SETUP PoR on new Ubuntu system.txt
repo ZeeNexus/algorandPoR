@@ -87,6 +87,11 @@ sudo update-alternatives --config python
 
 * Check your version of Python again
 
+___________________________
+(5c) Install Python TK
+sudo apt-get install python-tk
+
+
 
 ___________________________
 (6) Set up initial environment variables:
@@ -150,7 +155,11 @@ SETTING UP Chat dApp PoC - AlgorandPoR-GO (golang)
 
 GIT_TERMINAL_PROMPT=1 go get github.com/ZeeNexus/algochatPoR
 
+* install python-tk for python dialogs for setting up network
 
+sudo apt-get install python-tk
+
+* open readme.txt in the portestnet* directory of algochatPoR for further instructions
 
 
 
