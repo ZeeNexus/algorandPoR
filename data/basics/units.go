@@ -39,6 +39,10 @@ type Blacklisted struct {
 type MetaData struct {
 	BlacklistedCount uint64
 	ReviewCountPer500Rounds uint64
+	Institution []byte
+	Organization []byte
+	CountryOfOrigin []byte
+	GroupAssociation []byte
 	// Add more when needed
 }
 

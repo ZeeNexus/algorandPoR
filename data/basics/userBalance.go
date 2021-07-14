@@ -57,7 +57,9 @@ type AccountData struct {
 	Reputation Reputation `codec:"reputation"`
 	MicroAlgos MicroAlgos `codec:"algo"`
 	Blacklisted Blacklisted `codec:"black"`
-	MataData   MetaData   `codec:"meta"`
+	MetaData   MetaData   `codec:"meta"`
+	NumberReviews uint64 `codec:"numreviews"`
+	LastReviewTime []byte `codec:"lastreview"`
 	
 	// RewardsBase is used to implement rewards.
 	// This is not meaningful for accounts with Status=NotParticipating.
@@ -114,6 +116,7 @@ type AccountDetail struct {
 	Algos   MicroAlgos
 	Status  Status
 	Blacklisted Blacklisted `codec:"black"`
+	MetaData   MetaData   `codec:"meta"`
 }
 
 // SupplyDetail encapsulates meaningful details about the ledger's current token supply
@@ -166,6 +169,9 @@ func (u AccountData) WithUpdatedBlacklisted(proto config.ConsensusParams, update
 	}
 	return u
 }
+
+// metdata feature
+// func (u AccountData) WithUpdatedMetaData(
 
 
 // WithUpdatedRewards returns an updated number of algos in an AccountData
