@@ -19,6 +19,7 @@ package ledger
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
 
 	"github.com/mattn/go-sqlite3"
 
@@ -234,7 +235,8 @@ func accountsNewRound(tx *sql.Tx, rnd basics.Round, updates map[basics.Address]a
 	defer replaceStmt.Close()
 
 	for addr, data := range updates {
-		if (data.new == basics.AccountData{}) {
+		if (reflect.DeepEqual(data.new, basics.AccountData{})) {
+		//if (data.new == basics.AccountData{}) {
 			// prune empty accounts
 			_, err = deleteStmt.Exec(addr[:])
 		} else {

@@ -30,6 +30,7 @@ import (
   "strconv"
   "math/rand"
   "strings"
+  "reflect"
 
 
 	"github.com/algorand/go-algorand/config"
@@ -673,8 +674,11 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		// It's always OK to have the account move to an empty state,
 		// because the accounts DB can delete it.  Otherwise, we will
 		// enforce MinBalance.
-		if data == (basics.AccountData{}) {
+		//if data == (basics.AccountData{}) {
+
+		if (reflect.DeepEqual(data, basics.AccountData{})) {
 			continue
+		
 		}
 
 		// Skip FeeSink and RewardsPool MinBalance checks here.
