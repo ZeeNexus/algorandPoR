@@ -419,6 +419,9 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 
 	reputation := record.Reputation
 	blacklisted := record.Blacklisted // (blacklist feature)
+	//metadata := record. record.Me//MetaData   `codec:"meta"`
+	//numberreviews :=  //uint64 `codec:"numreviews"`
+	//lastreviewtime //[]byte `codec:"lastreview"`
 
 	amount := record.MicroAlgos
 	amountWithoutPendingRewards := recordWithoutPendingRewards.MicroAlgos

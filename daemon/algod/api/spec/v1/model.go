@@ -106,6 +106,34 @@ type Participation struct { // Round and Address fields are redundant if Partici
 	VoteKeyDilution uint64 `json:"votekd"`
 }
 
+
+// Stores meta data to detect bias
+type MetaData struct {
+	BlacklistedCount uint64
+	ReviewCountPer500Rounds uint64
+	// Institution indicates the timestamp of the last review for this account
+	//
+	// required: false
+	// swagger:strfmt byte
+	Institution []byte
+	// Organization indicates the timestamp of the last review for this account
+	//
+	// required: false
+	// swagger:strfmt byte
+	Organization []byte
+	// CountryOfOrigin indicates the timestamp of the last review for this account
+	//
+	// required: false
+	// swagger:strfmt byte
+	CountryOfOrigin []byte
+	// GroupAssociation indicates the timestamp of the last review for this account
+	//
+	// required: false
+	// swagger:strfmt byte
+	GroupAssociation []byte
+	// Add more when needed
+}
+
 // Account Description
 // swagger:model Account
 type Account struct {
@@ -130,6 +158,26 @@ type Account struct {
 	// 0 indicates false (good guy)
 	// 1 indicates true (bad guy)
 	Blacklisted uint64 `json:"blacklisted"`
+	
+	///////////////////////////////////////
+	// new features
+	///////////////////////////////////////
+
+	// MetaData indicates the metadata (gender, organization, national origin etc) for this account
+	//
+	// required: true
+	MetaData MetaData `json:"meta"`
+
+	// NumberReviews indicates the number of reviews for this account
+	//
+	// required: true
+	NumberReviews uint64 `json:"numreviews"`
+
+	// LastReviewTime indicates the timestamp of the last review for this account
+	//
+	// required: true
+	// swagger:strfmt byte
+	LastReviewTime []byte `json:"lastreview"`
 	
 	
 	// Amount indicates the total number of MicroAlgos in the account
