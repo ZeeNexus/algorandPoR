@@ -166,11 +166,12 @@ func (u AccountData) WithUpdatedBlacklisted(proto config.ConsensusParams, update
 		var ot OverflowTracker
 		newval := ot.AddR(update, Round(500))
 		u.Blacklisted = Blacklisted{Raw: newval}
+		u.MetaData.BlacklistedCount++
 	}
 	return u
 }
 
-// metdata feature
+// (metadata feature)
 // func (u AccountData) WithUpdatedMetaData(
 
 

@@ -142,7 +142,7 @@ func (b unauthenticatedBundle) BlacklistLeader(ctx context.Context, l LedgerRead
 	//b.Proposal.BlockDigest()
 	leader.Blacklisted.Raw = b.Round + 500
 	//test := b.Proposal.BlockDigest.String()
-	logging.Base().Infof("AugAugAugAug Round = %v, BlacklistedRound = %v", b.Round, leader.Blacklisted.Raw)
+	
 	return bundle{}, nil
 }
 
