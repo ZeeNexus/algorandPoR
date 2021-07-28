@@ -162,12 +162,22 @@ func (u AccountData) WithUpdatedReputation(proto config.ConsensusParams, update 
 
 // (blacklist feature)
 func (u AccountData) WithUpdatedBlacklisted(proto config.ConsensusParams, update Round) AccountData {
+	/*
 	if u.Status != NotParticipating {
 		var ot OverflowTracker
 		newval := ot.AddR(update, Round(500))
-		u.Blacklisted = Blacklisted{Raw: newval}
-		u.MetaData.BlacklistedCount++
+		u.Blacklisted.BlacklistedRound = uint64(newval) // = Blacklisted{BlacklistedRound: newval}
+		u.Blacklisted.Currently = 1
+		u.Blacklisted.BlacklistedCount++
 	}
+	*/
+	blCount := u.Blacklisted.BlacklistedCount
+	u.Blacklisted = Blacklisted{BlacklistedRound: uint64(update) + 500, Currently: 1, BlacklistedCount: blCount+1}
+	/*
+		u.Blacklisted.BlacklistedRound = uint64(update) + 500 // = Blacklisted{BlacklistedRound: newval}
+		u.Blacklisted.Currently = 1
+		u.Blacklisted.BlacklistedCount++
+		*/
 	return u
 }
 
@@ -216,7 +226,15 @@ func (u AccountData) RepVotingStake() Reputation {
 	return u.Reputation
 }
 
+func (u AccountData) BlacklistToRound() uint64 {
 
+	return u.Blacklisted.BlacklistedRound
+}
+
+func (u AccountData) BlacklistCurrently() uint64 {
+
+	return u.Blacklisted.Currently
+}
 
 
 // KeyDilution returns the key dilution for this account,

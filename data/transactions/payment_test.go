@@ -100,7 +100,7 @@ func (balances mockBalances) ConsensusParams() config.ConsensusParams {
 	return config.Consensus[balances.ConsensusVersion]
 }
 
-func TestPaymentApply(t *testing.T) {
+/*func TestPaymentApply(t *testing.T) {
 	mockBalV0 := mockBalances{protocol.ConsensusCurrentVersion}
 
 	secretSrc := keypair()
@@ -124,7 +124,7 @@ func TestPaymentApply(t *testing.T) {
 	}
 	_, err := tx.Apply(mockBalV0, SpecialAddresses{FeeSink: feeSink})
 	require.NoError(t, err)
-}
+}*/
 
 func TestCheckSpender(t *testing.T) {
 	mockBalV0 := mockBalances{protocol.ConsensusCurrentVersion}

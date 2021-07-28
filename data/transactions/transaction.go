@@ -102,7 +102,11 @@ type Header struct {
     CategoryID  int64             `codec:"categoryid"` 
 	GenesisID   string            `codec:"gen"`
 	GenesisHash crypto.Digest     `codec:"gh"`
-	
+
+	// Group specifies that this transaction is part of a
+	// transaction group (and, if so, specifies the hash
+	// of a TxGroup).
+	Group crypto.Digest `codec:"grp"`
 }
 
 // Transaction describes a transaction that can appear in a block.
@@ -140,6 +144,8 @@ type ApplyData struct {
 	SenderRewards   basics.MicroAlgos `codec:"rs"`
 	ReceiverRewards basics.MicroAlgos `codec:"rr"`
 	CloseRewards    basics.MicroAlgos `codec:"rc"`
+	CallForBlacklist bool         `codec:"cfbl"`  //blacklist call true=blacklist user
+	CurrentRound uint64  		  `codec:"cfblr"` //blacklist call round currently in
 }
 
 // ToBeHashed implements the crypto.Hashable interface.
@@ -399,7 +405,8 @@ func (tx Transaction) EstimateEncodedSize() int {
 }
 
 // Apply changes the balances according to this transaction.
-func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyData, err error) {
+func (tx Transaction) Apply(balances Balances, spec SpecialAddresses, adbl *ApplyData) (ad ApplyData, err error) {
+	if (adbl == nil) { return }
 	params := balances.ConsensusParams()
 
 	// move fee to pool
@@ -410,13 +417,13 @@ func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyD
 
 	switch tx.Type {
 	case protocol.PaymentTx:
-		err = tx.PaymentTxnFields.apply(tx.Header, balances, spec, &ad)
+		err = tx.PaymentTxnFields.apply(tx.Header, balances, spec, adbl, &ad)
 
 	case protocol.KeyRegistrationTx:
 		err = tx.KeyregTxnFields.apply(tx.Header, balances, spec, &ad)
 
     case protocol.ReviewTx:
-		err = tx.ReviewTxnFields.apply(tx.Header, balances, spec, &ad)
+		err = tx.ReviewTxnFields.apply(tx.Header, balances, spec, adbl, &ad)
 
 	default:
 		err = fmt.Errorf("Unknown transaction type %v", tx.Type)
@@ -429,6 +436,9 @@ func (tx Transaction) Apply(balances Balances, spec SpecialAddresses) (ad ApplyD
 		ad.ReceiverRewards = basics.MicroAlgos{}
 		ad.CloseRewards = basics.MicroAlgos{}
 	}
+
+
+
 
 	return
 }

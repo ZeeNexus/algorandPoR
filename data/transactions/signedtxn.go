@@ -18,6 +18,7 @@ package transactions
 
 import (
 	"context"
+	"fmt"
 	"errors"
 
 	"github.com/algorand/go-algorand/config"
@@ -165,9 +166,13 @@ func (s *SignedTxn) PtrPriority() TxnPriority {
 func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) error {
     isReview := (s.Txn.Type == protocol.ReviewTx)
     
+    logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] enter verify")) 
+
 	if err := s.Txn.WellFormed(spec, proto); err != nil {
 		return err
 	}
+
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] checked wellformed. other checks next")) 
 
 	zeroAddress := basics.Address{}
 	if s.Txn.Src() == zeroAddress {
@@ -187,6 +192,9 @@ func (s SignedTxn) Verify(spec SpecialAddresses, proto config.ConsensusParams) e
     //        return nil
     //    }
     }
+
+    logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] done with verify with no errors")) 
+
 	return nil
 
 }

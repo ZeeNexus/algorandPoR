@@ -74,12 +74,18 @@ type (
 // Otherwise, an error is returned.
 func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Membership, current basics.Round) (res Credential, err error) {
 	selectionKey := m.Record.SelectionID
+	blRound := m.Record.BlacklistToRound()
+	blCurrently:= m.Record.BlacklistCurrently()
 	ok, vrfOut := selectionKey.Verify(cred.Proof, m.Selector)
     
+
     // Checks if the member is blacklisted or not (blacklist feature)
-	if(current <= m.Record.Blacklisted.Raw){
-		logging.Base().Infof("AugAugAug Blacklisted! Round = %v, Blacklist Value = %v", current, m.Record.Blacklisted.Raw)
+	if(current <= basics.Round(blRound)) {
+		logging.Base().Infof("Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
   		return
+	} else {
+		logging.Base().Infof("NOT Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
+		//m.Record.Blacklisted.Currently = 0
 	}
 
 	hashable := hashableCredential{
@@ -109,7 +115,7 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 			logging.Base().Panicf("UnauthenticatedCredential.Verify: total rep = %v, but user rep = %v", m.TotalReputation, userRep)
 	} else {
 		weight = sortition.SelectRepBased(userRep.Raw, m.TotalReputation.Raw, expectedSelection, h)
-		//logging.Base().Infof("PoR %v %v %v %v", userRep.Raw, m.TotalReputation.Raw, expectedSelection, weight)
+		logging.Base().Infof("PoR %v %v %v %v", userRep.Raw, m.TotalReputation.Raw, expectedSelection, weight)
 	}
 
 	/*

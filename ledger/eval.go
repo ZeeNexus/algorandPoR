@@ -86,13 +86,17 @@ func (cs *roundCowState) UpdateReputation(addr basics.Address, update int64) err
 	return nil
 }
 
+//(blacklist feature)
 func (cs *roundCowState) UpdateBlacklisted(addr basics.Address, update basics.Round) error {
 	olddata, err := cs.lookup(addr)
 	if err != nil {
+		logging.Base().Info(fmt.Errorf("Blacklist in UpdateBlacklisted Error")) 
+
 		return err
 	}
-	//logging.Base().Infof("AugAugAug Blacklist old = %v, Blacklist new = %v", cs.proto, update)
+	
 	newdata := olddata.WithUpdatedBlacklisted(cs.proto, update)
+	logging.Base().Info(fmt.Errorf("Blacklist in UpdateBlacklisted blRound:%v blCount:%v", newdata.Blacklisted.BlacklistedRound, newdata.Blacklisted.BlacklistedCount)) 
 	cs.put(addr, olddata, newdata)
 	return nil
 }
@@ -623,10 +627,23 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	}
 
 	// Apply the transaction, updating the cow balances
-	applyData, err := txn.Txn.Apply(cow, spec)
+	
+
+	applyData, err := txn.Txn.Apply(cow, spec, ad)
 	if err != nil {
 		return fmt.Errorf("transaction %v: %v", txn.ID(), err)
 	}
+
+	if ad != nil {
+		ad.CallForBlacklist = false
+		ad.CurrentRound = 0
+	}
+	
+	if ad == nil {
+		logging.Base().Info(fmt.Errorf("[eval.transaction] ad is null, we're doing a pool test from TestTransaction"))
+
+	}
+
 
 	// Validate applyData if we are validating an existing block.
 	// If we are validating and generating, we have no ApplyData yet.
@@ -766,19 +783,25 @@ func (eval *BlockEvaluator) GenerateBlock() (*ValidatedBlock, error) {
 	return &vb, nil
 }
 
-// Function that blacklists original proposer (leader) (blacklist feature)
-func (eval* BlockEvaluator) BlacklistLeader(proposer basics.Address, note string) error {
-    var err error
+// Function that blacklists a node (user) whether participant, non-part, verifier, or round leader (blacklist feature) 
+//func (eval* BlockEvaluator) BlacklistNode(nodeAddr basics.Address, note string) error {
+func (eval* BlockEvaluator) BlacklistNode(ad *transactions.ApplyData) error {
+
+	ad.CallForBlacklist = true	
+	ad.CurrentRound = uint64(eval.block.Round())
+    /*var err error
     var leader basics.BalanceRecord
     cow := eval.state.child()
-    cow.UpdateBlacklisted(proposer, eval.block.Round())
-    leader, err = cow.Get(proposer)
+    cow.UpdateBlacklisted(nodeAddr, eval.block.Round())
+    leader, err = cow.Get(nodeAddr)
 
     if err != nil{
+    	logging.Base().Infof("INSIDE BlacklistLeader: error")
         return err
     }
 
-    logging.Base().Infof("AugAugAug ProposerAddr = %v, Blacklist = %v, round = %v, note = %v ", proposer, leader.Blacklisted.Raw, eval.block.Round(), note)
+    logging.Base().Infof("INSIDE BlacklistLeader: ProposerAddr = %v, BlacklistedRound = %v, currRound = %v, note = %v ", nodeAddr, leader.Blacklisted.BlacklistedRound, eval.block.Round(), note)
+    */
 
     return nil
 }
@@ -803,6 +826,8 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 		return stateDelta{}, evalAux{}, err
 	}
 
+	CallToBlacklist := false
+
 	for _, txn := range payset {
 		select {
 		case <-ctx.Done():
@@ -810,26 +835,77 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 		default:
 		}
 		
+		/////////////////////////////////////////////////
 		// Blacklists on error or blacklist note
-        proposer := l.proposerBlock.Proposal.OriginalProposer
-        //         logging.Base().Infof("AugAugAug Hi there %v", proposer.String())
+        //proposer := l.proposerBlock.Proposal.OriginalProposer //proposer is the round leader
         note := string(txn.Txn.Header.Note)
-        // testing purpose only (blacklist feature)
-        if strings.Contains(note, "blacklist"){
-            eval.BlacklistLeader(proposer, note)
-        }
+        txn.ApplyData.CallForBlacklist = false
+		txn.ApplyData.CurrentRound = 0
+        //sender := txn.Txn.Header.Sender // is the sender of the review/note/transaction (from)
 
-        // eval.BlacklistLeader(proposer, note)
+
+
+        // testing purpose only (blacklist feature)
+        logging.Base().Info(fmt.Errorf("[Blacklist EVAL] note: %v", note))
+
+        if strings.Contains(note, "blacklist"){            
+			
+			//eval.BlacklistNode(sender, note)
+			logging.Base().Info(fmt.Errorf("Blacklist EVAL BEFORE Call to Blacklist Node"))
+			eval.BlacklistNode(&txn.ApplyData)
+			CallToBlacklist = true
+
+			logging.Base().Info(fmt.Errorf("Blacklist EVAL CallTo: %v CurrRound: %v", txn.ApplyData.CallForBlacklist, txn.ApplyData.CurrentRound))
+/////////////////
+// it no longer can retrieve the sender info with the new blacklist data. stays 0. credentials.go also does not show any changes
+// even after this. so it appears to not be saving the new accountdata changes beyond this.
+
+			//cow := eval.state.child()
+			//cow.commitToParent()
+			//testdata, err := cow.lookup(sender)			
+			//testdata, err := cow.Get(sender)
+			/*
+			lastRound := l.Latest()
+			//testdata here is an instance of AccountData on basics/data/userbalance.go
+			testdata, err := l.Lookup(lastRound, basics.Address(sender))
+
+			if err != nil {
+				logging.Base().Info(fmt.Errorf("Blacklist AAA Error in cow lookup"))
+				return stateDelta{}, evalAux{}, err
+			}			
+			logging.Base().Info(fmt.Errorf("Blacklist AAA Proposer: %v Sender: %v blRound:%v blCount:%v rep:%v", proposer, sender, testdata.Blacklisted.BlacklistedRound, testdata.Blacklisted.BlacklistedCount, testdata.Reputation)) 
+			//logging.Base().Info(fmt.Errorf("Blacklist AAA Proposer: %v Sender: %v\n\n", proposer, sender)) 
+	    	*/
+	    }
+		/////////////////////////////////////////////////
         
+
         
 
 		err = eval.Transaction(txn.SignedTxn, &txn.ApplyData)
-        logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.Transaction"))  
-		if err != nil {
-            // eval.BlacklistLeader(proposer, note) // if tx is not good then blacklist (blacklist feature)
+		if err != nil {            
 			return stateDelta{}, evalAux{}, err
 		}
+
+		//////////////////////////////////
+		// (blacklist feature)
+		if CallToBlacklist {   
+			testdata, err := l.Lookup(basics.Round(txn.ApplyData.CurrentRound), basics.Address(txn.Txn.Header.Sender))      
+			if err != nil {
+				logging.Base().Info(fmt.Errorf("Blacklist EVAL Error in cow lookup"))
+				return stateDelta{}, evalAux{}, err
+			}			
+			logging.Base().Infof("EVAL CallToBlacklist: Sender: %v blRound: %v blCount: %v note: %v", txn.Txn.Header.Sender, testdata.Blacklisted.BlacklistedRound, testdata.Blacklisted.BlacklistedCount, note)
+			CallToBlacklist = false
+		}
+
+
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.Transaction"))  
+
 	}
+
+
+
 
 	// Finally, procees any pending end-of-block state changes
 	err = eval.endOfBlock()

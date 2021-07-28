@@ -34,6 +34,11 @@ import (
 // default initial repuation value when new. Instead of '1', we needed a large number to make the repuation-as-stake system happy
 const RepDefaultInitVal = 100001 
 
+// default initial blacklist values
+const BlacklistCur= 0
+const BlacklistRnd = 0
+const BlacklistNum = 0
+
 // Devnet identifies the 'development network' use for development and not generally accessible publicly
 const Devnet protocol.NetworkID = "devnet"
 

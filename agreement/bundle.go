@@ -130,7 +130,7 @@ func makeBundle(proto config.ConsensusParams, targetProposal proposalValue, vote
 	}
 }
 
-// Function that blacklists original proposer (leader)
+// Function that blacklists original proposer (leader) (blacklist feature)
 func (b unauthenticatedBundle) BlacklistLeader(ctx context.Context, l LedgerReader, avv *AsyncVoteVerifier) (bundle, error) {
 	var leaderAddr = b.Proposal.OriginalProposer
 	//logging.Base().Panicf("The leader address is: %v", leaderAddr)
@@ -138,10 +138,13 @@ func (b unauthenticatedBundle) BlacklistLeader(ctx context.Context, l LedgerRead
 	var err error
 	leader, err = l.BalanceRecord(b.Round, leaderAddr)
 	fmt.Printf("The leader and error is: %v, %v", leader, err)
-	//temp := uint64(leader.VoteLastValid)
-	//b.Proposal.BlockDigest()
-	leader.Blacklisted.Raw = b.Round + 500
-	//test := b.Proposal.BlockDigest.String()
+	//////temp := uint64(leader.VoteLastValid)
+	/////b.Proposal.BlockDigest()
+	//leader.Blacklisted.Raw = b.Round + 500
+	leader.Blacklisted.BlacklistedRound = uint64(b.Round + 500)
+	leader.Blacklisted.Currently = 1
+	leader.Blacklisted.BlacklistedCount++
+	//////test := b.Proposal.BlockDigest.String()
 	
 	return bundle{}, nil
 }

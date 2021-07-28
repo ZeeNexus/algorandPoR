@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"encoding/json"
 
 	"github.com/gorilla/mux"
 
@@ -36,6 +37,7 @@ import (
 	"github.com/algorand/go-algorand/ledger"
 	"github.com/algorand/go-algorand/node"
 	"github.com/algorand/go-algorand/protocol"
+	"github.com/algorand/go-algorand/logging"
 )
 
 func nodeStatus(node *node.AlgorandFullNode) (res v1.NodeStatus, err error) {
@@ -346,19 +348,61 @@ func RawTransaction(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) 
 	//         schema: {type: string}
 	//       401: { description: Invalid API Token }
 	//       default: { description: Unknown Error }
-	var st transactions.SignedTxn
+//	var st transactions.SignedTxn
+
+
+//=======================================
+
+/*	b, err2 := json.Marshal(st)
+    if err2 != nil {
+        fmt.Println(err2)
+        return
+    }
+    logging.Base().Info(fmt.Errorf("RawTransaction isFail 0? error:%v", string(b))) 
+*/
+
+	// Decode the signed transaction
+	var stx transactions.SignedTxn
+
+	decoder := protocol.NewDecoder(r.Body)
+	err := decoder.Decode(&stx)
+	if err != nil { logging.Base().Info(fmt.Errorf("RawTransaction - unable to decode into stx"))  }	
+
+	// Ensure we were able to decode the stransaction
+	a, err := json.Marshal(stx)
+	if err != nil { logging.Base().Info(fmt.Errorf("RawTransaction - unable to json marshal stx")) }
+	
+	logging.Base().Info(fmt.Errorf("RawTransaction isFail 1 msg:%v", string(a))) 
+	
+	
+//=======================================
+
+
+
+    
+	/*
 	err := protocol.NewDecoder(r.Body).Decode(&st)
+	b, err2 = json.Marshal(st)
+    if err2 != nil {
+        fmt.Println(err2)
+        return
+    }
+    logging.Base().Info(fmt.Errorf("RawTransaction isFail 0b? error:%v", string(b))) 
+	logging.Base().Info(fmt.Errorf("RawTransaction isFail 1? error:%v", ctx.Log)) 
+
+	if err != nil {
+		lib.ErrorResponse(w, http.StatusBadRequest, err, err.Error(), ctx.Log)
+		return
+	}*/
+	//logging.Base().Info(fmt.Errorf("RawTransaction isFail 1? error:%v", ctx.Log)) 
+
+	txid, err := ctx.Node.BroadcastSignedTxn(stx)
+	logging.Base().Info(fmt.Errorf("RawTransaction isFail 2 error:%v", ctx.Log)) 
 	if err != nil {
 		lib.ErrorResponse(w, http.StatusBadRequest, err, err.Error(), ctx.Log)
 		return
 	}
-
-	txid, err := ctx.Node.BroadcastSignedTxn(st)
-	if err != nil {
-		lib.ErrorResponse(w, http.StatusBadRequest, err, err.Error(), ctx.Log)
-		return
-	}
-
+	logging.Base().Info(fmt.Errorf("RawTransaction isFail 3 passed - onto SendJSON next")) 
 	SendJSON(TransactionIDResponse{&v1.TransactionID{TxID: txid.String()}}, w, ctx.Log)
 }
 
@@ -419,9 +463,28 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 
 	reputation := record.Reputation
 	blacklisted := record.Blacklisted // (blacklist feature)
-	//metadata := record. record.Me//MetaData   `codec:"meta"`
-	//numberreviews :=  //uint64 `codec:"numreviews"`
-	//lastreviewtime //[]byte `codec:"lastreview"`
+	metadata := record.MetaData // record.Me//MetaData   `codec:"meta"`
+	numberreviews := record.NumberReviews //uint64 `codec:"numreviews"`
+	lastreviewtime := record.LastReviewTime //[]byte `codec:"lastreview"`
+
+	v1Metadata := v1.MetaData {
+		ReviewCountPer500Rounds:	metadata.ReviewCountPer500Rounds,
+		Institution:				metadata.Institution,
+		Organization:				metadata.Organization,
+		CountryOfOrigin:			metadata.CountryOfOrigin,
+		GroupAssociation:			metadata.GroupAssociation,
+		Gender:						metadata.Gender,
+		Age:						metadata.Age,
+	}
+
+	v1Blacklisted := v1.Blacklisted {
+		Currently:					blacklisted.Currently,
+		BlacklistedRound:			blacklisted.BlacklistedRound,
+		BlacklistedCount:			blacklisted.BlacklistedCount,
+	}	
+
+	logging.Base().Info(fmt.Errorf("Blacklist HANDLER -- blRound:%v blCount:%v", blacklisted.BlacklistedRound, blacklisted.BlacklistedCount)) 
+
 
 	amount := record.MicroAlgos
 	amountWithoutPendingRewards := recordWithoutPendingRewards.MicroAlgos
@@ -444,7 +507,10 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 		Address:                     addr.String(),
 		Amount:                      amount.Raw,
 		Reputation:                  reputation.Raw,
-        Blacklisted: 		     	 uint64(blacklisted.Raw), // (blacklist feature)
+        Blacklisted: 		     	 v1Blacklisted, //uint64(blacklisted.Raw), // (blacklist feature)
+        MetaData:					 v1Metadata,
+        NumberReviews:				 numberreviews,
+        LastReviewTime:				 lastreviewtime,
 		PendingRewards:              pendingRewards.Raw,
 		AmountWithoutPendingRewards: amountWithoutPendingRewards.Raw,
 		Rewards:                     record.RewardedMicroAlgos.Raw,

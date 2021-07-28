@@ -176,6 +176,9 @@ func generateGenesisFiles(outDir string, proto protocol.ConsensusVersion, netNam
 		data.Status = wallet.Online
 		data.MicroAlgos.Raw = wallet.Stake
 		data.Reputation.Raw = config.RepDefaultInitVal
+		data.Blacklisted.BlacklistedRound = config.BlacklistRnd
+		data.Blacklisted.Currently = config.BlacklistCur
+		data.Blacklisted.BlacklistedCount = config.BlacklistNum
 		if wallet.Online == basics.Online {
 			data.VoteID = part.VotingSecrets().OneTimeSignatureVerifier
 			data.SelectionID = part.VRFSecrets().PK

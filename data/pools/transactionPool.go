@@ -136,6 +136,9 @@ func (pool *TransactionPool) Test(t transactions.SignedTxn) error {
 // test assumes that pool.mu is locked.  It might release the lock
 // while it waits for OnNewBlock() to be called.
 func (pool *TransactionPool) test(t transactions.SignedTxn) error {
+
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] entered test")) 
+
 	if pool.pendingBlockEvaluator == nil {
 		return fmt.Errorf("TransactionPool.test: no pending block evaluator")
 	}
@@ -145,6 +148,7 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 	// to catch up to the ledger.
 	latest := pool.ledger.Latest()
 	waitExpires := time.Now().Add(timeoutOnNewBlock)
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre for loop")) 
 	for pool.pendingBlockEvaluator.Round() <= latest && time.Now().Before(waitExpires) {
 		condvar.TimedWait(&pool.cond, timeoutOnNewBlock)
 		if pool.pendingBlockEvaluator == nil {
@@ -152,6 +156,7 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 		}
 	}
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre tentative round")) 
 	tentativeRound := pool.pendingBlockEvaluator.Round() + pool.numPendingWholeBlocks
 	err := pool.pendingBlockEvaluator.TestTransaction(t, nil)
 	if err == ledger.ErrNoSpace {
@@ -198,32 +203,44 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 			t.Txn.Fee, feeThreshold, feePerByte, t.GetEncodedLength())
 	}
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] end of pool test - no errors")) 
+
 	return nil
 }
 
 // Remember stores the provided transaction
 // Precondition: Only Remember() properly-signed and well-formed transactions (i.e., ensure t.WellFormed())
 func (pool *TransactionPool) Remember(t transactions.SignedTxn) error {
+
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] enter Remember")) 
+
 	//t.ResetCaches()
     t.InitCaches()
 
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre pool.test")) 
+
 	err := pool.test(t)
 	if err != nil {
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pool.test fail -- %v", err.Error())) 
 		return fmt.Errorf("a TransactionPool.Remember: %v", err)
 	}
 
-	if pool.pendingBlockEvaluator == nil {
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre pool.pending")) 
 
+	if pool.pendingBlockEvaluator == nil {
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pool.pend fail -- %v", err.Error())) 
 		return fmt.Errorf("b TransactionPool.Remember: no pending block evaluator")
 
 	}
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre remember")) 
+
 	err = pool.remember(t)
 	if err != nil {
-
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pool.remember fail -- %v", err.Error())) 
 		return fmt.Errorf("c TransactionPool.Remember: %v", err)
 
 	}
@@ -233,6 +250,7 @@ func (pool *TransactionPool) Remember(t transactions.SignedTxn) error {
 
 // remember tries to add the transaction to the pool, bypassing the fee priority checks.
 func (pool *TransactionPool) remember(t transactions.SignedTxn) error {
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] enter remember from Remember")) 
 	err := pool.addToPendingBlockEvaluator(t)
 	if err != nil {
 		return err
@@ -240,6 +258,8 @@ func (pool *TransactionPool) remember(t transactions.SignedTxn) error {
 
 	pool.pendingTxns = append(pool.pendingTxns, t)
 	pool.pendingTxids[t.ID()] = t
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] leaving Remember no errors")) 
+
 	return nil
 }
 

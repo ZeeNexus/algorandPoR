@@ -32,17 +32,20 @@ type Reputation struct {
 
 // Whether or not the committee member is blacklisted for the round (blacklist feature)
 type Blacklisted struct {
-	Raw Round
+	Currently uint64 // 0 = false (good guy), 1 = true (bad guy)
+	BlacklistedRound uint64 //Round // Raw Round
+	BlacklistedCount uint64
 }
 
 // Stores meta data to detect bias
-type MetaData struct {
-	BlacklistedCount uint64
+type MetaData struct {	
 	ReviewCountPer500Rounds uint64
 	Institution []byte
 	Organization []byte
 	CountryOfOrigin []byte
 	GroupAssociation []byte
+	Gender []byte
+	Age uint64
 	// Add more when needed
 }
 

@@ -61,7 +61,7 @@ func (payment PaymentTxnFields) checkSpender(header Header, spec SpecialAddresse
 // than overwriting it.  For example, Transaction.Apply() may
 // have updated ad.SenderRewards, and this function should only
 // add to ad.SenderRewards (if needed), but not overwrite it.
-func (payment PaymentTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
+func (payment PaymentTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, adbl *ApplyData, ad *ApplyData) error {
 	// move tx money
 	if !payment.Amount.IsZero() || payment.Receiver != (basics.Address{}) {
 		err := balances.Move(header.Sender, payment.Receiver, payment.Amount, &ad.SenderRewards, &ad.ReceiverRewards)
@@ -69,6 +69,13 @@ func (payment PaymentTxnFields) apply(header Header, balances Balances, spec Spe
 			return err
 		}
 	}
+
+	// (blacklist feature)
+    if (adbl.CallForBlacklist)    {
+    	balances.UpdateBlacklisted(header.Sender, basics.Round(adbl.CurrentRound))   
+    	ad.CallForBlacklist = false
+    	ad.CurrentRound = 0	 
+    }	
 
 
 	if payment.CloseRemainderTo != (basics.Address{}) {

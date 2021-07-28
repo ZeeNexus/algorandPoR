@@ -106,10 +106,27 @@ type Participation struct { // Round and Address fields are redundant if Partici
 	VoteKeyDilution uint64 `json:"votekd"`
 }
 
-
-// Stores meta data to detect bias
-type MetaData struct {
+// Stores the blacklist data for an account (blacklist feature)
+type Blacklisted struct {
+	// Currently indicates whether this account is blacklisted currently for this round
+	//
+	// required: false
+	Currently uint64 // 0 = false (good guy), 1 = true (bad guy)
+	// BlacklistedRound indicates which round this account is blacklisted until
+	//
+	// required: false	
+	BlacklistedRound uint64 // Round // Raw Round
+	// BlacklistedCount indicates the number of times this account has been blacklisted
+	//
+	// required: false	
 	BlacklistedCount uint64
+}
+
+// Stores meta data to detect bias (metadata feature)
+type MetaData struct {
+	// ReviewCountPer500Rounds indicates the number of reviews over the last 500 rounds for this account
+	//
+	// required: false
 	ReviewCountPer500Rounds uint64
 	// Institution indicates the timestamp of the last review for this account
 	//
@@ -131,6 +148,15 @@ type MetaData struct {
 	// required: false
 	// swagger:strfmt byte
 	GroupAssociation []byte
+	// Gender indicates the metadata age of the user for this account
+	//
+	// required: false
+	// swagger:strfmt byte
+	Gender []byte
+	// Age indicates the metadata age of the user for this account
+	//
+	// required: false
+	Age uint64	
 	// Add more when needed
 }
 
@@ -152,18 +178,16 @@ type Account struct {
 	// required: true
 	Reputation uint64 `json:"reputation"`
 
-	// Blacklisted indicates whether or not the account is blacklisted for the round (blacklist feature)
-	//
-	// required: true
-	// 0 indicates false (good guy)
-	// 1 indicates true (bad guy)
-	Blacklisted uint64 `json:"blacklisted"`
-	
 	///////////////////////////////////////
 	// new features
 	///////////////////////////////////////
 
-	// MetaData indicates the metadata (gender, organization, national origin etc) for this account
+	// Blacklisted indicates the blacklisted data (blacklist feature)
+	//
+	// required: true
+	Blacklisted Blacklisted `json:"blacklisted"`	
+
+	// MetaData indicates the metadata (gender, organization, national origin etc) for this account (metadata feature)
 	//
 	// required: true
 	MetaData MetaData `json:"meta"`

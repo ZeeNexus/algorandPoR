@@ -391,6 +391,9 @@ func (node *AlgorandFullNode) Ledger() *data.Ledger {
 
 // BroadcastSignedTxn broadcasts a transaction that has already been signed.
 func (node *AlgorandFullNode) BroadcastSignedTxn(signed transactions.SignedTxn) (transactions.Txid, error) {
+
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] just entered")) 
+
 	lastRound := node.ledger.Latest()
 	b, err := node.ledger.BlockHdr(lastRound)
 	if err != nil {
@@ -402,20 +405,27 @@ func (node *AlgorandFullNode) BroadcastSignedTxn(signed transactions.SignedTxn) 
 	}
 	proto := config.Consensus[b.CurrentProtocol]
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] got BH and config, VERIFY next")) 
+
 	err = signed.Verify(spec, proto)
 	if err != nil {
 		node.log.Warnf("malformed transaction: %v - transaction was %+v", err, signed)
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] died in Verify -- %v - transaction was %+v", err, signed)) 
 		return transactions.Txid{}, err
 	}
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] done with verify, REMEMBER next")) 
 	err = node.transactionPool.Remember(signed)
 	if err != nil {
 		node.log.Infof("rejected by local pool: %v - transaction was %+v", err, signed)
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] died in Infof -- %v - transaction was %+v", err, signed)) 
 		return transactions.Txid{}, err
 	}
 
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] broadcast id:%v", signed.ID())) 
 	err = node.net.Broadcast(context.TODO(), protocol.TxnTag, protocol.Encode(signed), true, nil)
 	if err != nil {
 		node.log.Infof("failure broadcasting transaction to network: %v - transaction was %+v", err, signed)
+		logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn] died in Broadcast")) 
 		return transactions.Txid{}, err
 	}
 	node.log.Infof("Sent signed tx %s", signed.ID())

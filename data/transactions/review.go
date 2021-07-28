@@ -111,7 +111,7 @@ func (review ReviewTxnFields) checkSpenderReview(header Header, spec SpecialAddr
 // than overwriting it.  For example, Transaction.Apply() may
 // have updated ad.SenderRewards, and this function should only
 // add to ad.SenderRewards (if needed), but not overwrite it.
-func (review ReviewTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, ad *ApplyData) error {
+func (review ReviewTxnFields) apply(header Header, balances Balances, spec SpecialAddresses, adbl *ApplyData, ad *ApplyData) error {
 	// move tx money
 	if !review.AmountReview.IsZero() || review.ReceiverReview != (basics.Address{}) {
 		err := balances.Move(header.Sender, review.ReceiverReview, review.AmountReview, &ad.SenderRewards, &ad.ReceiverRewards)
@@ -122,6 +122,14 @@ func (review ReviewTxnFields) apply(header Header, balances Balances, spec Speci
 
     //evaluateReview(&header)    
     //balances.UpdateReputation(header.Sender, 2)
+
+    // (blacklist feature)
+    if (adbl.CallForBlacklist)    {
+    	balances.UpdateBlacklisted(header.Sender, basics.Round(adbl.CurrentRound))     
+    	ad.CallForBlacklist = false
+    	ad.CurrentRound = 0	 
+    }	
+	
 
     balances.UpdateReputation(header.Sender, header.RepAdjust)
     // log.Printf("%v %v\n", header.RepAdjust, header.ReviewEval)
