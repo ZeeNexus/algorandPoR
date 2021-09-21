@@ -18,7 +18,8 @@ package data
 
 import (
 	"fmt"
-	"time"
+	"time"		
+	"sort"
 
 	"github.com/algorand/go-algorand/agreement"
 	"github.com/algorand/go-algorand/config"
@@ -46,6 +47,16 @@ type Ledger struct {
 
 	log logging.Logger
 }
+
+
+
+///////////////////////////////////
+// min stake feature
+type ReputationRange []uint64
+func (a ReputationRange) Len() int           { return len(a) }
+func (a ReputationRange) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ReputationRange) Less(i, j int) bool { return a[i] < a[j] }
+
 
 func makeGenesisBlocks(proto protocol.ConsensusVersion, genesisBal GenesisBalances, genesisID string, genesisHash crypto.Digest) ([]bookkeeping.Block, error) {
 	params, ok := config.Consensus[proto]
@@ -263,6 +274,65 @@ func (l *Ledger) ConsensusVersion(r basics.Round) (protocol.ConsensusVersion, er
 	}
 	return blockhdr.UpgradeState.CurrentProtocol, nil
 }
+
+
+
+// MinStake gives the Minimumum Stake required in a given round,
+// returning an error if we don't have that round or we have an
+// I/O error.
+// (min stake feature)
+func (l *Ledger) MinStake(r basics.Round) (float64, error) {
+	var retVal float64
+	retVal = -999.0
+	allAccts, err := l.AllBalances(r)
+	if err != nil {
+		return retVal, err
+	}
+
+	var reputations []uint64
+	var totalrep uint64
+	totalrep = 0
+
+	for _, ad := range allAccts {
+		// 	Logf("%s\t%d", addr, ad.Reputation.Raw)
+		reputations = append(reputations, ad.Reputation.Raw)
+		totalrep += ad.Reputation.Raw
+	}
+
+	repLen := len(reputations)
+
+	if repLen <= 0 || totalrep <= 0 {
+		return 1.0, nil // nobody online
+	}
+
+	
+	sort.Sort(ReputationRange(reputations)) // in numerical order
+
+	//////////////////////////////////
+	// find the median (2nd quantile)
+	meanNumber := repLen / 2
+	var q2 uint64
+	q2 = 1 // default median
+
+	if repLen%2 == 0 { // is even
+		q2 = (reputations[meanNumber-1] + reputations[meanNumber]) / 2
+	} else {  // is odd
+		q2 = reputations[meanNumber]
+	}
+
+	//////////////////////////////////////
+	// calculate the minstake value from q2
+	if reputations[repLen-1] == 1 || q2 <= 1 {
+		retVal = 1.0/float64(totalrep) // max reptation is still value 1 or a little more than half are rep=1, so q2 is 1
+	} else {
+		retVal = float64(q2)/float64(totalrep) // use the real q2
+	}			
+
+	return retVal, nil
+}
+
+
+
 
 // EnsureValidatedBlock ensures that the block, and associated certificate c, are
 // written to the ledger, or that some other block for the same round is

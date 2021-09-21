@@ -76,10 +76,16 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 
 	totalRep, err := l.ReputationCirculation(balanceRound)
 	if err != nil {
-		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain total reoutation circulation in round %v: %v", r, balanceRound, err)
+		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain total reputation circulation in round %v: %v", r, balanceRound, err)
 		return
 	}
 
+    //(min stake feature)
+	minStake, err := l.MinStake(balanceRound) // (r)
+	if err != nil {
+		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain min stake in round %v: %v", r, balanceRound, err)
+		return
+	}
 
 	seed, err := l.Seed(seedRound)
 	if err != nil {
@@ -87,6 +93,7 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 		return
 	}
 
+	m.RoundMinStake = minStake // test until Membership has a member minStake
 	m.Record = record
 	m.Selector = selector{Seed: seed, Round: r, Period: p, Step: s}
 	m.TotalMoney = total

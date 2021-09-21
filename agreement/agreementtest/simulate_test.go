@@ -218,6 +218,10 @@ func (l *testLedger) ReputationCirculation(r basics.Round) (basics.Reputation, e
 	return basics.Reputation{}, nil
 }
 
+// (min stake feature)
+func (l *testLedger) MinStake(r basics.Round) (float64, error) {
+	return 1.0, nil
+}
 
 
 func (l *testLedger) Circulation(r basics.Round) (basics.MicroAlgos, error) {

@@ -102,6 +102,19 @@ func (r AccountInformationResponse) getBody() interface{} {
 	return r.Body
 }
 
+// AccountListResponse contains a list of accounts 
+//
+// swagger:response AccountListResponse
+type AccountListResponse struct {
+	// in: body
+	Body *v1.AccountList
+}
+
+func (r AccountListResponse) getBody() interface{} {
+	return r.Body
+}
+
+
 // TransactionResponse contains a transaction information
 //
 // swagger:response TransactionResponse

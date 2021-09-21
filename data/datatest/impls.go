@@ -111,6 +111,11 @@ func (i ledgerImpl) ReputationCirculation(r basics.Round) (basics.Reputation, er
 	return basics.Reputation{}, nil
 }
 
+// MinStake implements Ledger.MinStake
+func (i ledgerImpl) MinStake(r basics.Round) (float64, error) {
+	return i.l.MinStake(r)
+}
+
 // Circulation implements Ledger.Circulation.
 func (i ledgerImpl) Circulation(r basics.Round) (basics.MicroAlgos, error) {
 	return i.l.Circulation(r)

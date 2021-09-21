@@ -498,7 +498,10 @@ func (t *demuxTester) ReputationCirculation(basics.Round) (basics.Reputation, er
 	return basics.Reputation{}, nil
 }
 
-
+// (min stake feature)
+func (l *demuxTester) MinStake(r basics.Round) (float64, error) {
+	return 1.0, nil
+}
 
 // implement Ledger
 func (t *demuxTester) ConsensusParams(basics.Round) (config.ConsensusParams, error) {

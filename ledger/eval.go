@@ -396,6 +396,7 @@ func evaluateReviewTest(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjus
     if !(repAdjust <= -9999) {        
         _, err := stderr.WriteString("exists")
         if err != nil {}
+        logging.Base().Info(fmt.Errorf("ZZZZINFO(IN EVAL TEST) [A] eval:%v adjust:%v", reviewEval, repAdjust))
         return uint64(reviewEval), int64(repAdjust), nil, stderr
     }
  
@@ -404,6 +405,8 @@ func evaluateReviewTest(txn transactions.SignedTxn) (ReviewEval uint64, RepAdjus
     min := 0
     max := 100
     reviewEval = rand.Intn(max - min + 1) + min
+
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(IN EVAL TEST) [B] eval:%v adjust:%v", reviewEval, repAdjust))
     
     // compare to rating    
     if (reviewRateX > reviewEval && ((reviewRateX-reviewEval) <= 20)) || (reviewEval > reviewRateX && ((reviewEval-reviewRateX) <= 20)) {

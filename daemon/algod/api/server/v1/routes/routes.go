@@ -57,6 +57,13 @@ var Routes = lib.Routes{
 	},
 
 	lib.Route{
+		Name:        "account-list",
+		Method:      "GET",
+		Path:        "/account/accountlist",
+		HandlerFunc: handlers.GetAccountList,
+	},
+
+	lib.Route{
 		Name:        "transaction-information",
 		Method:      "GET",
 		Path:        fmt.Sprintf("/account/{addr:[A-Z0-9]{%d}}/transaction/{txid:[A-Z0-9]+}", KeyLength),

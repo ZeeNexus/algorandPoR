@@ -42,6 +42,7 @@ type Membership struct {
 	Selector   Selector
 	TotalMoney basics.MicroAlgos
 	TotalReputation basics.Reputation
+	RoundMinStake float64
 }
 
 // A Seed contains cryptographic entropy which can be used to determine a

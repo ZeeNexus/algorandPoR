@@ -242,6 +242,19 @@ type Account struct {
 	Participation Participation `json:"participation,omitempty"`
 }
 
+// AccountList contains a list of accounts
+// swagger:model AccountList
+type AccountList struct {
+	// Accounts is a list of accounts
+	//
+	// required: true
+	Accounts []Account `json:"accounts,omitempty"`
+	// TotalAccts is number of accounts
+	//
+	// required: true
+	TotalAccts uint64 `json:"totalAccts"`
+}
+
 // Transaction contains all fields common to all transactions and serves as an envelope to all transactions
 // type
 // swagger:model Transaction

@@ -145,6 +145,14 @@ type LedgerReader interface {
 	Circulation(basics.Round) (basics.MicroAlgos, error)
 
 
+
+	// MinStake gives the Minimumum Stake required in a given round,
+	// returning an error if we don't have that round or we have an
+	// I/O error.
+	// (min stake feature)
+	MinStake(basics.Round) (float64, error) 
+
+
 	// LookupDigest returns the Digest of the entry that was agreed on in a
 	// given round.
 	//

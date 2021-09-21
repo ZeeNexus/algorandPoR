@@ -158,6 +158,7 @@ func (pool *TransactionPool) test(t transactions.SignedTxn) error {
 
 	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre tentative round")) 
 	tentativeRound := pool.pendingBlockEvaluator.Round() + pool.numPendingWholeBlocks
+	logging.Base().Info(fmt.Errorf("[BroadcastSignedTxn Verify] pre TestTransaction")) 
 	err := pool.pendingBlockEvaluator.TestTransaction(t, nil)
 	if err == ledger.ErrNoSpace {
 		tentativeRound++

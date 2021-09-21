@@ -77,16 +77,25 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 	blRound := m.Record.BlacklistToRound()
 	blCurrently:= m.Record.BlacklistCurrently()
 	ok, vrfOut := selectionKey.Verify(cred.Proof, m.Selector)
+	minStake := m.RoundMinStake
     
 
-    // Checks if the member is blacklisted or not (blacklist feature)
-	if(current <= basics.Round(blRound)) {
+	
+
+    // Checks if the member is blacklisted or not (blacklist feature)	
+	if (blCurrently == 1) {
 		logging.Base().Infof("Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
   		return
 	} else {
 		logging.Base().Infof("NOT Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
 		//m.Record.Blacklisted.Currently = 0
 	}
+
+	// reset Currently if past blround - need to do this somewhere else
+	//if(uint64(current) >= blRound) { 
+	//	m.Record.Blacklisted.Currently = 0
+	//}
+
 
 	hashable := hashableCredential{
 		RawOut: vrfOut,
@@ -110,7 +119,7 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 
 	expectedSelection := float64(m.Selector.CommitteeSize(proto))
 
-	userRep := m.Record.RepVotingStake()
+	userRep := m.Record.RepVotingStake()	
 	if m.TotalReputation.Raw < userRep.Raw {
 			logging.Base().Panicf("UnauthenticatedCredential.Verify: total rep = %v, but user rep = %v", m.TotalReputation, userRep)
 	} else {
@@ -118,18 +127,19 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
 		logging.Base().Infof("PoR %v %v %v %v", userRep.Raw, m.TotalReputation.Raw, expectedSelection, weight)
 	}
 
-	/*
-	//userMoney := m.Record.VotingStake()
-	if m.TotalMoney.Raw < userMoney.Raw {
-		logging.Base().Panicf("UnauthenticatedCredential.Verify: total money = %v, but user money = %v", m.TotalMoney, userMoney)
-	} else if m.TotalMoney.IsZero() || expectedSelection == 0 || expectedSelection > float64(m.TotalMoney.Raw) {
-		logging.Base().Panicf("UnauthenticatedCredential.Verify: m.TotalMoney %v, expectedSelection %v", m.TotalMoney.Raw, expectedSelection)
-	} else if userMoney.IsZero() {
-		// weight = 0
-	} else {
-		//weight = sortition.Select(userMoney.Raw, m.TotalMoney.Raw, expectedSelection, h)
+
+	/////////////////////////////////////////////////
+	// (minimum stake feature) check minimum stake
+	// min-stake is 1/total_rep when max node rep = 1 (i.e. everyone is at 1) or 2nd quantile (Q2) is 1
+	//           is Q2/total_rep when Q2 > 1 (Q2 = median for this application)
+	// userRep, m.TotalReputation.Raw
+	userStake := float64(userRep.Raw) / float64(m.TotalReputation.Raw)
+	logging.Base().Infof("RoundMinStake for round (%v) = ||%v||,\n userRep = %v, totalRep = %v, userStake = %v\n", current, minStake, userRep.Raw, m.TotalReputation.Raw, userStake)
+	if userStake < minStake {
+		err = fmt.Errorf("UnauthenticatedCredential.Verify: node does not meet minimum stake (%v), userStake (%v)", minStake, userStake)
+		return
 	}
-	*/
+
 
 	if weight == 0 {
 		err = fmt.Errorf("UnauthenticatedCredential.Verify: credential has weight 0")

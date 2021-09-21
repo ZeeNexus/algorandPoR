@@ -521,6 +521,129 @@ func AccountInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Reque
 	SendJSON(AccountInformationResponse{&accountInfo}, w, ctx.Log)
 }
 
+
+
+// GetAccountList is an httpHandler for route GET /v1/account/accountlist.
+func GetAccountList(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) {
+	// swagger:operation GET /v1/account/accountlist GetAccountList
+	// ---
+	//     Summary: Get a list of accounts in the system
+	//     Description: >
+	//       Get the list of all accounts in the system,
+	//       returns all accounts
+	//     Produces:
+	//     - application/json
+	//     Schemes:
+	//     - http
+	//     Parameters:
+	//
+	//     Responses:
+	//       "200":
+	//         "$ref": '#/responses/AccountListResponse'
+	//       500:
+	//         description: Internal Error
+	//         schema: {type: string}
+	//       401: { description: Invalid API Token }
+	//       default: { description: Unknown Error }
+	
+
+	myLedger := ctx.Node.Ledger()
+	allAccts, err := myLedger.AllBalances(myLedger.Latest())	
+	if err != nil {
+		return
+	}
+
+
+	totalAccts:= (uint64(len(allAccts)) - 3)
+	i := 0
+
+
+	responseAccts := make([]v1.Account, totalAccts)
+	for addr, acct := range allAccts {
+
+		//////////////////////////////////////////
+		// skip the first 3 accounts since they are "rewards pool" and "fee sink" and "primary replayer" accounts
+		// we only want nodes
+			//logging.Base().Info(fmt.Errorf("GetAccountList Before -- i:%v ", i)) 
+		if i < 3 { 
+			i++
+			continue 
+		}
+			//logging.Base().Info(fmt.Errorf("GetAccountList After and Added -- addr:%v ", addr.String())) 
+
+
+
+		///////////////////////////////////////
+		// convert accountData to account
+		reputation := acct.Reputation
+		blacklisted := acct.Blacklisted 
+		metadata := acct.MetaData 
+		numberreviews := acct.NumberReviews 
+		lastreviewtime := acct.LastReviewTime 
+
+		v1Metadata := v1.MetaData {
+			ReviewCountPer500Rounds:	metadata.ReviewCountPer500Rounds,
+			Institution:				metadata.Institution,
+			Organization:				metadata.Organization,
+			CountryOfOrigin:			metadata.CountryOfOrigin,
+			GroupAssociation:			metadata.GroupAssociation,
+			Gender:						metadata.Gender,
+			Age:						metadata.Age,
+		}
+
+		v1Blacklisted := v1.Blacklisted {
+			Currently:					blacklisted.Currently,
+			BlacklistedRound:			blacklisted.BlacklistedRound,
+			BlacklistedCount:			blacklisted.BlacklistedCount,
+		}	
+
+		amount := acct.MicroAlgos
+		//amountWithoutPendingRewards := recordWithoutPendingRewards.MicroAlgos
+		//pendingRewards, overflowed := basics.OSubA(amount, amountWithoutPendingRewards)
+
+
+		apiParticipation := v1.Participation{
+			ParticipationPK: acct.VoteID[:],
+			VRFPK:           acct.SelectionID[:],
+			VoteFirst:       uint64(acct.VoteFirstValid),
+			VoteLast:        uint64(acct.VoteLastValid),
+			VoteKeyDilution: acct.VoteKeyDilution,
+		}
+
+		////////////////////////////////////
+		// add account to response list of accounts
+		responseAccts[i-3] = v1.Account{
+			Round:                       uint64(myLedger.Latest()),
+			Address:                     addr.String(),
+			Amount:                      amount.Raw,
+			Reputation:                  reputation.Raw,
+	        Blacklisted: 		     	 v1Blacklisted, //uint64(blacklisted.Raw), // (blacklist feature)
+	        MetaData:					 v1Metadata,
+	        NumberReviews:				 numberreviews,
+	        LastReviewTime:				 lastreviewtime,
+			//PendingRewards:              pendingRewards.Raw,
+			//AmountWithoutPendingRewards: amountWithoutPendingRewards.Raw,
+			Rewards:                     acct.RewardedMicroAlgos.Raw,
+			Status:                      acct.Status.String(),
+			Participation:               apiParticipation,
+		}
+		i++
+	
+	}
+
+
+	response := AccountListResponse{
+		Body: &v1.AccountList{
+			Accounts: responseAccts,
+			TotalAccts: totalAccts,
+		},
+	}
+
+	SendJSON(response, w, ctx.Log)
+}
+
+
+
 // TransactionInformation is an httpHandler for route GET /v1/account/{addr:[A-Z0-9]{KeyLength}}/transaction/{txid:[A-Z0-9]+}
 func TransactionInformation(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) {
 	// swagger:operation GET /v1/account/{address}/transaction/{txid} TransactionInformation
