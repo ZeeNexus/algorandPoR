@@ -21,6 +21,7 @@ import (
 
 	"github.com/algorand/go-algorand/config"
 	"github.com/algorand/go-algorand/data/basics"
+	
 )
 
 // PaymentTxnFields captures the fields used by payment transactions.
@@ -70,9 +71,16 @@ func (payment PaymentTxnFields) apply(header Header, balances Balances, spec Spe
 		}
 	}
 
+	// min stake testing to adjust a specified node addr's reputation. Shares NodeToBlacklist var with blacklist testing
+	if (adbl.CallForAdjustment && adbl.Adjustment > 0) { // header.RepAdjust != nil
+		balances.UpdateReputation(adbl.NodeToBlacklist, adbl.Adjustment)
+	}
+
+	//logging.Base().Info(fmt.Errorf("MINSTAKE PAYMENT apply: addr: %v RepAdjust: %v", adbl.NodeToBlacklist, header.RepAdjust))
+
 	// (blacklist feature)
     if (adbl.CallForBlacklist)    {
-    	balances.UpdateBlacklisted(header.Sender, basics.Round(adbl.CurrentRound))   
+    	balances.UpdateBlacklisted(adbl.NodeToBlacklist, basics.Round(adbl.CurrentRound))   //adbl.NodeToBlacklist
     	ad.CallForBlacklist = false
     	ad.CurrentRound = 0	 
     }	

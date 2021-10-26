@@ -389,6 +389,16 @@ func (node *AlgorandFullNode) Ledger() *data.Ledger {
 	return node.ledger
 }
 
+// RootDir exposes the node's root dir to the algod API code
+func (node *AlgorandFullNode) RootDir() string {
+	return node.rootDir
+}
+
+// RootDir exposes the node's root dir to the algod API code
+func (node *AlgorandFullNode) Net() network.GossipNode {
+	return node.net
+}
+
 // BroadcastSignedTxn broadcasts a transaction that has already been signed.
 func (node *AlgorandFullNode) BroadcastSignedTxn(signed transactions.SignedTxn) (transactions.Txid, error) {
 

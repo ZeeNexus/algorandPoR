@@ -85,11 +85,14 @@ func (cred UnauthenticatedCredential) Verify(proto config.ConsensusParams, m Mem
     // Checks if the member is blacklisted or not (blacklist feature)	
 	if (blCurrently == 1) {
 		logging.Base().Infof("Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
+		err = fmt.Errorf("UnauthenticatedCredential.Verify: node (%v) is currently blacklisted until round (%v)", m.Record.Addr, blRound)		
   		return
 	} else {
 		logging.Base().Infof("NOT Blacklisted! Round = %v, BlacklistRound Value = %v Currently = %v", current, blRound, blCurrently)
 		//m.Record.Blacklisted.Currently = 0
 	}
+
+	logging.Base().Infof("IS Blacklisted! blcurrently = %v, m.record.bl.currently = %v", blCurrently, m.Record.Blacklisted.Currently)
 
 	// reset Currently if past blround - need to do this somewhere else
 	//if(uint64(current) >= blRound) { 

@@ -121,6 +121,7 @@ func (factory NetworkFetcherFactory) New() Fetcher {
 func (factory NetworkFetcherFactory) NewOverGossip(tag protocol.Tag) Fetcher {
 	gossipPeers := factory.net.GetPeers(network.PeersConnectedIn)
 	factory.log.Debugf("%d gossip peers", len(gossipPeers))
+	
 	if len(gossipPeers) == 0 {
 		factory.log.Info("no gossip peers for NewOverGossip")
 		return factory.New()

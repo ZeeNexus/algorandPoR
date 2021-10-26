@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"		
 	"sort"
+	"strings"
 
 	"github.com/algorand/go-algorand/agreement"
 	"github.com/algorand/go-algorand/config"
@@ -222,6 +223,11 @@ func (l *Ledger) ReputationCirculation(r basics.Round) (basics.Reputation, error
 		return basics.Reputation{}, err
 	}
 
+	//////////////////////////////////
+	// remove relay node value - only concerned with participating nodes
+	defaultInitialRep := uint64(100001) // instead of 1
+	totals.Online.Reputation.Raw = totals.Online.Reputation.Raw - defaultInitialRep
+
 	return totals.Online.Reputation, nil
 }
 
@@ -284,29 +290,51 @@ func (l *Ledger) ConsensusVersion(r basics.Round) (protocol.ConsensusVersion, er
 func (l *Ledger) MinStake(r basics.Round) (float64, error) {
 	var retVal float64
 	retVal = -999.0
+	
 	allAccts, err := l.AllBalances(r)
 	if err != nil {
 		return retVal, err
 	}
 
+	b, err2 := l.BlockHdr(r)
+	if err2 != nil {
+		//return retVal, err
+	}
+
 	var reputations []uint64
+	var reputationsFull []uint64
 	var totalrep uint64
 	totalrep = 0
+	defaultInitialRep := uint64(100001) // instead of 1
+	
 
-	for _, ad := range allAccts {
-		// 	Logf("%s\t%d", addr, ad.Reputation.Raw)
-		reputations = append(reputations, ad.Reputation.Raw)
+
+	// may need to exclude special accounts and primary relay account, use only regular nodes
+	for addr, ad := range allAccts {
+		//Logf("%s\t%d\n", addr, ad.Reputation.Raw)
+		if addr == b.FeeSink || addr == b.RewardsPool {
+			continue
+		}
+		reputationsFull = append(reputationsFull, ad.Reputation.Raw)
 		totalrep += ad.Reputation.Raw
 	}
 
-	repLen := len(reputations)
-
+	repLen := len(reputationsFull)
 	if repLen <= 0 || totalrep <= 0 {
 		return 1.0, nil // nobody online
 	}
 
 	
-	sort.Sort(ReputationRange(reputations)) // in numerical order
+
+	
+	sort.Sort(ReputationRange(reputationsFull)) // in numerical order
+	reputations = reputationsFull[1:]  // remove first and smallest value node since we dont want to include relay node. relay will always be at least the smallest
+	totalrep = totalrep - defaultInitialRep // remove value of relay from total 
+	repLen = len(reputations)
+
+
+	logging.Base().Info(fmt.Errorf("\nSTAKESR acctlen: %v replen:%v totalrep:%v\n", len(allAccts), repLen, totalrep))
+
 
 	//////////////////////////////////
 	// find the median (2nd quantile)
@@ -322,11 +350,15 @@ func (l *Ledger) MinStake(r basics.Round) (float64, error) {
 
 	//////////////////////////////////////
 	// calculate the minstake value from q2
-	if reputations[repLen-1] == 1 || q2 <= 1 {
-		retVal = 1.0/float64(totalrep) // max reptation is still value 1 or a little more than half are rep=1, so q2 is 1
+	// if reputations[repLen-1] == 1 || q2 <= 1 {
+	if reputations[repLen-1] == defaultInitialRep || q2 <= defaultInitialRep {
+		retVal = float64(defaultInitialRep)/float64(totalrep) // max reptation is still value 1 or a little more than half are rep=1, so q2 is 1
 	} else {
 		retVal = float64(q2)/float64(totalrep) // use the real q2
 	}			
+
+    logging.Base().Info(fmt.Errorf("\nSTAKESR acctlen: %v replen:%v totalrep:%v q2:%v retVal:%v String(reputations):%v\n", len(allAccts), repLen, totalrep, q2, retVal, strings.Trim(strings.Replace(fmt.Sprint(reputations), " ", ",", -1), "[]")))
+	
 
 	return retVal, nil
 }

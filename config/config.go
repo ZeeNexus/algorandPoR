@@ -81,8 +81,8 @@ type Global struct {
 // Protocol holds the global configuration settings for the agreement protocol,
 // initialized with our current defaults. This is used across all nodes we create.
 var Protocol = Global{
-	SmallLambda: 7000 * time.Millisecond,  // orig 2000, then 3000
-	BigLambda:   25000 * time.Millisecond, // orig 15000
+	SmallLambda: 3000 * time.Millisecond,  // orig 2000, then 3000. finally 7000 when reviews
+	BigLambda:   15000 * time.Millisecond, // orig 15000, finally 25000 when reviews
 }
 
 // ConsensusParams specifies settings that might vary based on the

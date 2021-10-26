@@ -70,6 +70,7 @@ func WrapNetwork(net network.GossipNode) agreement.Network {
 	return i
 }
 
+
 func messageMetadataFromHandle(h agreement.MessageHandle) *messageMetadata {
 	if msg, isMsg := h.(*messageMetadata); isMsg {
 		return msg

@@ -23,6 +23,7 @@ import (
 	"github.com/algorand/go-algorand/data/basics"
 	"github.com/algorand/go-algorand/data/committee"
 	"github.com/algorand/go-algorand/protocol"
+	"github.com/algorand/go-algorand/logging"
 )
 
 // A Selector is the input used to define proposers and members of voting
@@ -59,14 +60,25 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 	if err != nil {
 		return
 	}
-	balanceRound := balanceRound(r, cparams)
+	var record2 basics.BalanceRecord
+	var rMinStake basics.Round 
+	balanceRound := balanceRound(r, cparams)	
 	seedRound := seedRound(r, cparams)
+	if r<3 { 
+		record2,err = l.BalanceRecord(r, addr)
+		rMinStake=balanceRound
+	}
+	if r>=3 { 
+	    record2,err = l.BalanceRecord(r-1, addr)
+	    rMinStake=r-2
+	}
 
 	record, err := l.BalanceRecord(balanceRound, addr)
 	if err != nil {
 		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain balance record for address %v in round %v: %v", r, addr, balanceRound, err)
 		return
 	}
+	//logging.Base().Info(fmt.Errorf("SELECTOR) bl current:%v rLu:%v recordLU:%#v", record.AccountData.Blacklisted.Currently, record2.AccountData.Blacklisted.Currently, record2.AccountData.Blacklisted))
 
 	total, err := l.Circulation(balanceRound)
 	if err != nil {
@@ -74,16 +86,16 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 		return
 	}
 
-	totalRep, err := l.ReputationCirculation(balanceRound)
+	totalRep, err := l.ReputationCirculation(rMinStake) // balanceRound 10-06-21 /r
 	if err != nil {
 		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain total reputation circulation in round %v: %v", r, balanceRound, err)
 		return
 	}
 
     //(min stake feature)
-	minStake, err := l.MinStake(balanceRound) // (r)
+	minStake, err := l.MinStake(rMinStake) // (balanceRound 10-06-21) /r
 	if err != nil {
-		err = fmt.Errorf("Service.initializeVote (r=%v): Failed to obtain min stake in round %v: %v", r, balanceRound, err)
+		err = fmt.Errorf("Service.initializeVote (r=%v): retVal(%v) Failed to obtain min stake in round %v: %v", r, minStake, rMinStake, err)
 		return
 	}
 
@@ -95,6 +107,11 @@ func membership(l LedgerReader, addr basics.Address, r basics.Round, p period, s
 
 	m.RoundMinStake = minStake // test until Membership has a member minStake
 	m.Record = record
+	m.Record.AccountData.Blacklisted = record2.AccountData.Blacklisted
+	if r>=3 && record2.AccountData.Reputation.Raw > 0 { m.Record.AccountData.Reputation = record2.AccountData.Reputation }
+	
+	//logging.Base().Info(fmt.Errorf("SELECTOR) TWO bl m.current:%v rLu:%v recordLU:%#v", m.Record.AccountData.Blacklisted.Currently, record2.AccountData.Blacklisted.Currently, record2.AccountData.Blacklisted))
+	logging.Base().Info(fmt.Errorf("SELECTOR) REP minstake:%v totalRep:%v mRep: %v mRep2:%v", minStake, totalRep, record.AccountData.Reputation.Raw, record2.AccountData.Reputation.Raw))
 	m.Selector = selector{Seed: seed, Round: r, Period: p, Step: s}
 	m.TotalMoney = total
 	m.TotalReputation = totalRep

@@ -146,6 +146,9 @@ type ApplyData struct {
 	CloseRewards    basics.MicroAlgos `codec:"rc"`
 	CallForBlacklist bool         `codec:"cfbl"`  //blacklist call true=blacklist user
 	CurrentRound uint64  		  `codec:"cfblr"` //blacklist call round currently in
+	NodeToBlacklist basics.Address `codec:"ntbl"` //blacklist which node oe increase which node's reputation (min stake feature)
+	Adjustment int64  		  `codec:"adjm"` //min stake adjustment
+	CallForAdjustment bool         `codec:"cfad"`  //min stake adjustment call true= adjust node
 }
 
 // ToBeHashed implements the crypto.Hashable interface.

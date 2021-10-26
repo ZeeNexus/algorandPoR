@@ -120,12 +120,10 @@ func (review ReviewTxnFields) apply(header Header, balances Balances, spec Speci
 		}
 	}
 
-    //evaluateReview(&header)    
-    //balances.UpdateReputation(header.Sender, 2)
 
     // (blacklist feature)
     if (adbl.CallForBlacklist)    {
-    	balances.UpdateBlacklisted(header.Sender, basics.Round(adbl.CurrentRound))     
+    	balances.UpdateBlacklisted(adbl.NodeToBlacklist, basics.Round(adbl.CurrentRound))     
     	ad.CallForBlacklist = false
     	ad.CurrentRound = 0	 
     }	

@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"io/ioutil"
+	"path/filepath"
 	"time"
 	"encoding/json"
 
@@ -258,7 +260,7 @@ func Status(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) {
 	//         schema: {type: string}
 	//       401: { description: Invalid API Token }
 	//       default: { description: Unknown Error }
-	nodeStatus, err := nodeStatus(ctx.Node)
+	nodeStatus, err := nodeStatus(ctx.Node) 
 	if err != nil {
 		lib.ErrorResponse(w, http.StatusInternalServerError, err, errFailedRetrievingNodeStatus, ctx.Log)
 		return
@@ -547,16 +549,73 @@ func GetAccountList(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) 
 	//       default: { description: Unknown Error }
 	
 
+
+
 	myLedger := ctx.Node.Ledger()
-	allAccts, err := myLedger.AllBalances(myLedger.Latest())	
+	allAccts, err := myLedger.AllBalances(myLedger.Latest())
 	if err != nil {
 		return
 	}
+
+	b, err2 := myLedger.BlockHdr(myLedger.Latest())
+	if err2 != nil {
+		return
+	}
+
+	
+
+	/////////////////////////////////////////////
+	genesisFile := filepath.Join(ctx.Node.RootDir(), "genesis.json")
+		genesisText, err := ioutil.ReadFile(genesisFile)
+		if err != nil {
+			logging.Base().Info(fmt.Errorf("GetAccountList Cannot read genesis file %s: %v\n", genesisFile, err))
+			
+		}
+
+		var genesis bookkeeping.Genesis
+		err = protocol.DecodeJSON(genesisText, &genesis)
+		if err != nil {
+			logging.Base().Info(fmt.Errorf("GetAccountList Cannot parse genesis file %s: %v\n", genesisFile, err))
+			
+		}
+
+		
+	var relayNode basics.Address
+
+	/////////////////////////////////
+	// find, keep, then use the relay node address
+	for _, entry := range genesis.Allocation {
+		if entry.Comment == "Wallet4Primary" {
+			relayNode, err = basics.UnmarshalChecksumAddress(entry.Address)
+			if err != nil { }
+			logging.Base().Info(fmt.Errorf("GetAccountList relayNode addr %v\n", relayNode))
+		}
+	}
+
+
+	/////////////////////////////////////////////
+
+
+
+	// relayNode := ctx.Node.RootDir() //ctx.Node.ListeningAddress()
 
 
 	totalAccts:= (uint64(len(allAccts)) - 3)
 	i := 0
 
+
+	////////////////////////////////
+	//genesisDir := filepath.Join(ctx.Node.RootDir(), ctx.Node.GenesisID())
+	//files, err := ioutil.ReadDir(genesisDir)
+	// For each of these files
+	//for _, info := range files {
+	//	logging.Base().Info(fmt.Errorf("GetAccountList status ||| name -- addr:%v ||| %v -- %v", info.Name(), ctx.Node.GenesisID())) 
+	//
+	//}
+
+
+
+	///////////////////////////////////
 
 	responseAccts := make([]v1.Account, totalAccts)
 	for addr, acct := range allAccts {
@@ -565,12 +624,16 @@ func GetAccountList(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) 
 		// skip the first 3 accounts since they are "rewards pool" and "fee sink" and "primary replayer" accounts
 		// we only want nodes
 			//logging.Base().Info(fmt.Errorf("GetAccountList Before -- i:%v ", i)) 
-		if i < 3 { 
-			i++
-			continue 
+		//if i < 3 { 
+		//	i++
+		//	continue 
+		//}
+		if addr == b.FeeSink || addr == b.RewardsPool || addr == relayNode {
+			continue
 		}
-			//logging.Base().Info(fmt.Errorf("GetAccountList After and Added -- addr:%v ", addr.String())) 
-
+		
+			logging.Base().Info(fmt.Errorf("GetAccountList status-- relay addr:%v -- %v", acct.Status.String(), addr.String())) 
+			//if isRelay { }
 
 
 		///////////////////////////////////////
@@ -612,7 +675,7 @@ func GetAccountList(ctx lib.ReqContext, w http.ResponseWriter, r *http.Request) 
 
 		////////////////////////////////////
 		// add account to response list of accounts
-		responseAccts[i-3] = v1.Account{
+		responseAccts[i] = v1.Account{
 			Round:                       uint64(myLedger.Latest()),
 			Address:                     addr.String(),
 			Amount:                      amount.Raw,

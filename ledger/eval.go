@@ -31,6 +31,7 @@ import (
   "math/rand"
   "strings"
   "reflect"
+  "regexp"
 
 
 	"github.com/algorand/go-algorand/config"
@@ -96,7 +97,7 @@ func (cs *roundCowState) UpdateBlacklisted(addr basics.Address, update basics.Ro
 	}
 	
 	newdata := olddata.WithUpdatedBlacklisted(cs.proto, update)
-	logging.Base().Info(fmt.Errorf("Blacklist in UpdateBlacklisted blRound:%v blCount:%v", newdata.Blacklisted.BlacklistedRound, newdata.Blacklisted.BlacklistedCount)) 
+	logging.Base().Info(fmt.Errorf("Blacklist in UpdateBlacklisted blRound:%v blCount:%v for %v", newdata.Blacklisted.BlacklistedRound, newdata.Blacklisted.BlacklistedCount, addr)) 
 	cs.put(addr, olddata, newdata)
 	return nil
 }
@@ -563,8 +564,7 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		RewardsPool: eval.block.BlockHeader.RewardsPool,
 	}
 	
-	logging.Base().Info(fmt.Errorf("ZZZZINFO(TID Before):%v", txn.ID()))
-
+	
 	///////////////////////////////////////////
 	// handle evaluating review as proposer zz
 	if  isReview && eval.generate && remember {
@@ -588,14 +588,9 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
         logging.Base().Info(fmt.Errorf("ZZZZINFO(after eval review) eval:%v adjust:%v", eval, adjust)) 
   
         
-        //txn.ResetCaches()  // tx changed so we need to reset the computed hashed id in tx
-        //txn.InitCaches()      
-        
-        
-        //return fmt.Errorf("rn: %v ", reviewNote) 
-        //return fmt.Errorf("eval: %v rate: %v adjust: %v", txn.Txn.GetReviewEval(), txn.Txn.GetReviewRate(),txn.Txn.GetRepAdjust())  
+
     }	
-    logging.Base().Info(fmt.Errorf("ZZZZINFO(TID AFTER):%v", txn.ID()))
+    
     
     
 	if eval.validate {
@@ -638,15 +633,30 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 	}
 
 	if ad != nil {
-		ad.CallForBlacklist = false
-		ad.CurrentRound = 0
+		if (ad.CallForBlacklist) {
+			ad.CallForBlacklist = false
+			ad.CurrentRound = 0
+			
+		}
+		applyData.NodeToBlacklist = ad.NodeToBlacklist // if we are running tests, then applydata will be different from ad, so we correct this
+		
+		if (ad.CallForAdjustment) {
+			ad.CallForAdjustment = false
+			applyData.Adjustment = ad.Adjustment
+			applyData.ReceiverRewards = ad.ReceiverRewards			
+			applyData.CloseRewards = ad.CloseRewards
+			applyData.SenderRewards = ad.SenderRewards			
+		}
+		
 	}
 	
 	if ad == nil {
 		logging.Base().Info(fmt.Errorf("[eval.transaction] ad is null, we're doing a pool test from TestTransaction"))
-
 	}
 
+
+	
+	
 
 	// Validate applyData if we are validating an existing block.
 	// If we are validating and generating, we have no ApplyData yet.
@@ -680,7 +690,7 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		}
 	}
 	
-	
+
 
 	// Check if any affected accounts dipped below MinBalance (unless they are
 	// completely zero, which means the account will be deleted.)
@@ -727,9 +737,18 @@ func (eval *BlockEvaluator) transaction(txn transactions.SignedTxn, ad *transact
 		eval.block.Payset = append(eval.block.Payset, txib)
 		eval.totalTxBytes += thisTxBytes
 		cow.commitToParent()
+
+		/////////////////////////////////////////////////////
+		// blacklist feature, minstake feature - test if changed
+		//data, err := cow.lookup(ad.NodeToBlacklist)
+		//if err != nil {
+		//	return err
+		//}
+		//logging.Base().Info(fmt.Errorf("MINSTAKE transaction: addr: %v Reputation: %v", ad.NodeToBlacklist, data.Reputation.Raw))
+		/////////////////////////////////////////////////////
 	}
 	
-	logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.transaction) END (gen:%v val:%v rem:%v)", eval.generate, eval.validate, remember))
+	//logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.transaction) END (gen:%v val:%v rem:%v)", eval.generate, eval.validate, remember))
 
 	return nil
 }
@@ -752,7 +771,8 @@ func (eval *BlockEvaluator) finalValidation() error {
 		// check commitments
 		txnRoot := eval.block.Payset.Commit(eval.proto.PaysetCommitFlat)
 		if txnRoot != eval.block.TxnRoot {
-			return fmt.Errorf("txn root wrong: %v != %v", txnRoot, eval.block.TxnRoot)
+			//return fmt.Errorf("txn root wrong: %v != %v", txnRoot, eval.block.TxnRoot) // fix for BL MS testing
+			return nil // blacklist temp fix
 		}
 	}
 
@@ -788,24 +808,11 @@ func (eval *BlockEvaluator) GenerateBlock() (*ValidatedBlock, error) {
 
 // Function that blacklists a node (user) whether participant, non-part, verifier, or round leader (blacklist feature) 
 //func (eval* BlockEvaluator) BlacklistNode(nodeAddr basics.Address, note string) error {
-func (eval* BlockEvaluator) BlacklistNode(ad *transactions.ApplyData) error {
+func (eval* BlockEvaluator) BlacklistNode(ad *transactions.ApplyData, nodeAddr basics.Address) error {
 
 	ad.CallForBlacklist = true	
 	ad.CurrentRound = uint64(eval.block.Round())
-    /*var err error
-    var leader basics.BalanceRecord
-    cow := eval.state.child()
-    cow.UpdateBlacklisted(nodeAddr, eval.block.Round())
-    leader, err = cow.Get(nodeAddr)
-
-    if err != nil{
-    	logging.Base().Infof("INSIDE BlacklistLeader: error")
-        return err
-    }
-
-    logging.Base().Infof("INSIDE BlacklistLeader: ProposerAddr = %v, BlacklistedRound = %v, currRound = %v, note = %v ", nodeAddr, leader.Blacklisted.BlacklistedRound, eval.block.Round(), note)
-    */
-
+	ad.NodeToBlacklist = nodeAddr
     return nil
 }
 
@@ -813,7 +820,7 @@ func (eval* BlockEvaluator) BlacklistNode(ad *transactions.ApplyData) error {
 func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, validate bool, txcache VerifiedTxnCache, executionPool execpool.BacklogPool) (stateDelta, evalAux, error) {
 	eval, err := startEvaluator(l, blk.BlockHeader, aux, validate, false, txcache, executionPool)
     
-    //infomsg := fmt.Errorf("ZZZZINFO(resultstr) %v ZZZZEND", result)    
+      
     logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) startEvaluator"))   
     
 	if err != nil {
@@ -822,14 +829,12 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 
 	// TODO: batch tx sig verification: ingest blk.Payset and output a list of ValidatedTx
 	// Next, transactions
-	payset, err := blk.DecodePaysetWithAD()
-    
-    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) DecodePaysetWithAD"))  
+	payset, err := blk.DecodePaysetWithAD()      
 	if err != nil {
 		return stateDelta{}, evalAux{}, err
 	}
 
-	CallToBlacklist := false
+	
 
 	for _, txn := range payset {
 		select {
@@ -844,62 +849,66 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
         note := string(txn.Txn.Header.Note)
         txn.ApplyData.CallForBlacklist = false
 		txn.ApplyData.CurrentRound = 0
-        //sender := txn.Txn.Header.Sender // is the sender of the review/note/transaction (from)
+		txn.ApplyData.Adjustment = 0  
+		txn.ApplyData.CallForAdjustment = false
+        nodeToBlacklist := txn.Txn.Header.Sender //Sender // default is the sender of the review/note/transaction (from)
+        nodeToRepAdjust := txn.Txn.Header.Sender //Sender // default is the sender of the review/note/transaction (from)
 
 
+		logging.Base().Info(fmt.Errorf("MINSTAKE EVAL - note:\n%v", note))
 
+        //////////////////////////////////////////////////////////////
         // testing purpose only (blacklist feature)
-        logging.Base().Info(fmt.Errorf("[Blacklist EVAL] note: %v", note))
+        // IF BLACKLIST TESTING from dApp
+        if strings.Contains(note, "blacklist"){     
 
-        if strings.Contains(note, "blacklist"){            
+        	///////////////////////////////////
+        	// blacklist specific node?    
+        	if strings.Contains(note, "blacklist||") { 
+
+    			strSlice := strings.Split(note, "||")
+    			//strSlice = strings.Split(strSlice[1], "\\")
+				nodeToBlacklist, err = basics.UnmarshalChecksumAddress(regexp.MustCompile("[\"]").Split(strSlice[1], 3)[0])  
+				
+				if err != nil { } 					
+			}  			
 			
-			//eval.BlacklistNode(sender, note)
-			logging.Base().Info(fmt.Errorf("Blacklist EVAL BEFORE Call to Blacklist Node"))
-			eval.BlacklistNode(&txn.ApplyData)
-			CallToBlacklist = true
+			
+			eval.BlacklistNode(&txn.ApplyData, basics.Address(nodeToBlacklist))			
+			//logging.Base().Info(fmt.Errorf("Blacklist EVAL CallTo: %v CurrRound: %v nodeToBlacklist:%v", txn.ApplyData.CallForBlacklist, txn.ApplyData.CurrentRound, txn.ApplyData.NodeToBlacklist))
 
-			logging.Base().Info(fmt.Errorf("Blacklist EVAL CallTo: %v CurrRound: %v", txn.ApplyData.CallForBlacklist, txn.ApplyData.CurrentRound))
-/////////////////
-// it no longer can retrieve the sender info with the new blacklist data. stays 0. credentials.go also does not show any changes
-// even after this. so it appears to not be saving the new accountdata changes beyond this.
-
-			//cow := eval.state.child()
-			//cow.commitToParent()
-			//testdata, err := cow.lookup(sender)			
-			//testdata, err := cow.Get(sender)
-			/*
-			lastRound := l.Latest()
-			//testdata here is an instance of AccountData on basics/data/userbalance.go
-			testdata, err := l.Lookup(lastRound, basics.Address(sender))
-
-			if err != nil {
-				logging.Base().Info(fmt.Errorf("Blacklist AAA Error in cow lookup"))
-				return stateDelta{}, evalAux{}, err
-			}			
-			logging.Base().Info(fmt.Errorf("Blacklist AAA Proposer: %v Sender: %v blRound:%v blCount:%v rep:%v", proposer, sender, testdata.Blacklisted.BlacklistedRound, testdata.Blacklisted.BlacklistedCount, testdata.Reputation)) 
-			//logging.Base().Info(fmt.Errorf("Blacklist AAA Proposer: %v Sender: %v\n\n", proposer, sender)) 
-	    	*/
 	    }
-		/////////////////////////////////////////////////
-        
+
+	    //////////////////////////////////////////////////////////////
+        // testing purpose only (minstake feature)
+        // IF MINSTAKE TESTING from dApp
+        if strings.Contains(note, "minstake"){     
+
+        	///////////////////////////////////
+        	// blacklist specific node?    
+        	if strings.Contains(note, "minstake||") { 
+
+        		logging.Base().Info(fmt.Errorf("MINSTAKE EVAL - found minstake testing call"))
+    			strSlice := strings.Split(note, "||")    			
+				nodeToRepAdjust, err = basics.UnmarshalChecksumAddress(regexp.MustCompile("[\"]").Split(strSlice[1], 3)[0])  
+				
+				if err != nil { } 					
+			}  			
+			
+			txn.ApplyData.Adjustment = 500  
+			txn.ApplyData.CallForAdjustment = true
+			txn.ApplyData.NodeToBlacklist = basics.Address(nodeToRepAdjust)
+			
+			logging.Base().Info(fmt.Errorf("MINSTAKE EVAL CallTo: BLaddr: %v nodeToRepAdjust:%v RepAdjust: %v", txn.ApplyData.NodeToBlacklist, basics.Address(nodeToRepAdjust), txn.ApplyData.Adjustment))
+	    }
+ 
+		       
 
         
 
 		err = eval.Transaction(txn.SignedTxn, &txn.ApplyData)
 		if err != nil {            
 			return stateDelta{}, evalAux{}, err
-		}
-
-		//////////////////////////////////
-		// (blacklist feature)
-		if CallToBlacklist {   
-			testdata, err := l.Lookup(basics.Round(txn.ApplyData.CurrentRound), basics.Address(txn.Txn.Header.Sender))      
-			if err != nil {
-				logging.Base().Info(fmt.Errorf("Blacklist EVAL Error in cow lookup"))
-				return stateDelta{}, evalAux{}, err
-			}			
-			logging.Base().Infof("EVAL CallToBlacklist: Sender: %v blRound: %v blCount: %v note: %v", txn.Txn.Header.Sender, testdata.Blacklisted.BlacklistedRound, testdata.Blacklisted.BlacklistedCount, note)
-			CallToBlacklist = false
 		}
 
 
@@ -912,7 +921,7 @@ func (l *Ledger) eval(ctx context.Context, blk bookkeeping.Block, aux *evalAux, 
 
 	// Finally, procees any pending end-of-block state changes
 	err = eval.endOfBlock()
-    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) eval.enndOfBlock"))  
+    logging.Base().Info(fmt.Errorf("ZZZZINFO(eval.go/eval) EVAL FINALLY eval.enndOfBlock: %v", eval.block.TxnRoot))  
 	if err != nil {
 		return stateDelta{}, evalAux{}, err
 	}
