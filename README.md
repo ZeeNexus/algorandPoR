@@ -4,9 +4,9 @@ algorand-por
 ====================
 Algorand PoR's official implementation in Go.
 
-Algorand is a permissionless, pure proof-of-stake blockchain that delivers decentralization, scalability, security, and transaction finality.
-
 ## Getting Started ##
+
+Instruction altered and ammended from Algorand's official instructions to work with the tools and setup needed for AlgorandPoR
 
 You will need both "git" (git >=1.8.2) installed and "git lfs" installed. "git lfs" is used to manage the large files in this branch (currently, they are JAR files in the NLP /tools/ directory). 
 
@@ -74,12 +74,12 @@ Genesis files for mainnet, testnet, and betanet can be found in `installer/genes
 
 ## Contributing (Code, Documentation, Bugs, Etc) ##
 
-Please refer to our [CONTRIBUTING](CONTRIBUTING.md) document.
+C. Diaz De Leon (xddlg), A. Tran (autran0), and J. Li (175552) helped contribute to some of this code for a project in a shared course at the University for Fall 2019.
 
 
 ## Project Layout ##
 
-`go-algorand` is split into various subpackages.
+`go-algorand` is split into various subpackages. algorand-por augments this layout.
 
 The following packages provide core functionality to the `algod` and `kmd` daemons, as well as other tools and commands:
 
@@ -134,8 +134,3 @@ A number of packages provide utilities for the various components:
 ## License
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](COPYING)
 
-Please see the [COPYING_FAQ](COPYING_FAQ) for details about how to apply our license.
-
-Copyright (C) 2019, Algorand Inc
-
-[developer site url]: https://developer.algorand.org/
