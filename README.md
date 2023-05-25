@@ -1,5 +1,6 @@
 
 algorand-por
+Proof of Review (heavily modified Algorand engine to implement our new consensus). 
 
 ====================
 Algorand PoR's official implementation in Go.
