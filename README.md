@@ -2,11 +2,13 @@
 # **Proof of Review** 
 (heavily modified Algorand engine to implement our new consensus). 
 
-[READ "Proof of Review: Trust Me, It’s Been Reviewed" (Full Version)](Proof_of_Review_Paper__2023__ACM_(full)(github).pdf)
+**[READ "Proof of Review: Trust Me, It’s Been Reviewed" (Full Version)](Proof_of_Review_Paper__2023__ACM_(full)(github).pdf)**
 
-========= Algorand PoR's official implementation in Go.===========
+
 
 ## Getting Started ##
+
+========= Algorand PoR's official implementation in Go.===========
 
 Instruction altered and ammended from Algorand's official instructions to work with the tools and setup needed for AlgorandPoR
 
