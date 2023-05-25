@@ -2,7 +2,7 @@
 # **Proof of Review** 
 (heavily modified Algorand engine to implement our new consensus). 
 
-[READ THE FULL PAPER HERE](Proof_of_Review_Paper__2023__ACM_(full)(github).pdf)
+[READ "Proof of Review: Trust Me, It’s Been Reviewed" (Full Version)](Proof_of_Review_Paper__2023__ACM_(full)(github).pdf)
 
 ========= Algorand PoR's official implementation in Go.===========
 
